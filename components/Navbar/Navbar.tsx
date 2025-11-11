@@ -34,7 +34,7 @@ const Navbar = () => {
           href="/"
           className="shrink-0 text-lg sm:text-xl font-bold tracking-tight text-gray-900"
         >
-          <span className="text-green-700">AJ</span> Foundation
+          <span className="text-green-700">A/J Khan</span> Foundation
         </Link>
 
         {/* Middle: Nav items */}

@@ -20,7 +20,7 @@ const Hero = () => {
         <div className="max-w-2xl py-16">
           {/* Main Heading */}
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
-            আস-সুন্নাহ ফাউন্ডেশন
+            এ/জে খান ফাউন্ডেশন
           </h1>
 
           {/* Description */}

@@ -88,8 +88,42 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-10 pt-6 text-center text-sm text-emerald-200">
-          © {new Date().getFullYear()} আস‑সুন্নাহ ফাউন্ডেশন — সর্ব স্বত্ব সংরক্ষিত।
+        <div className="border-t border-white/10 mt-12 pt-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            {/* Copyright */}
+            <div className="text-center md:text-left">
+              <p className="text-sm text-emerald-200/90">
+                © {new Date().getFullYear()} আস‑সুন্নাহ ফাউন্ডেশন — সর্ব স্বত্ব সংরক্ষিত।
+              </p>
+            </div>
+
+            {/* Developer Credit */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-emerald-200/70">Developed by</span>
+              
+              <a 
+                href="https://rijoan.com" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white font-medium hover:text-emerald-300 transition-colors duration-200 flex items-center gap-1 group"
+              >
+                MD Rijoan Maruf
+                <svg 
+                  className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" 
+                  />
+                </svg>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
