@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import TitleBg from "@/components/Contact/TitleBg";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -8,6 +9,50 @@ const Contact = () => {
     subject: "",
     message: "",
   });
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const faqs: { q: string; a: string }[] = [
+    {
+      q: "আমি কীভাবে দান করতে পারি?",
+      a: "আপনি আমাদের 'আরও জানুন' বা 'দান করুন' পৃষ্ঠার মাধ্যমে অনলাইনে দান করতে পারেন অথবা সরাসরি ব্যাংক ট্রান্সফার ব্যবহার করতে পারেন।",
+    },
+    {
+      q: "দানে ট্যাক্স ছাড় আছে কি?",
+      a: "আমাদের প্রতিষ্ঠান নিবন্ধিত এবং নির্দিষ্ট শর্ত পূরণে দানকারীদের ট্যাক্স সুবিধা পাওয়া যেতে পারে। বিস্তারিত জানতে আমাদের সাথে যোগাযোগ করুন।",
+    },
+    {
+      q: "আমি কীভাবে স্বেচ্ছাসেবক হিসেবে যোগ দিতে পারি?",
+      a: "আপনি আমাদের যোগাযোগ ফর্ম পূরণ করে স্বেচ্ছাসেবক হিসেবে আবেদন করতে পারেন — নির্দিষ্ট আবেদন ফিল্ডগুলোতে আপনার আগ্রহ এবং সময় দিন উল্লেখ করুন।",
+    },
+    {
+      q: "প্রকল্পে অংশগ্রহণের শর্ত কী?",
+      a: "প্রকল্পভিত্তিক অংশগ্রহণের জন্য সাধারণত একটি সংক্ষিপ্ত প্রশিক্ষণ এবং আবেদন প্রক্রিয়া থাকে; প্রতিটি প্রকল্পের শর্ত ভিন্ন হতে পারে।",
+    },
+    {
+      q: "আপনার শিক্ষামূলক কার্যক্রম কোথায় অনুষ্ঠিত হয়?",
+      a: "আমাদের শিক্ষা কার্যক্রম স্থানীয় কমিউনিটি সেন্টার এবং অনলাইন উভয় স্থানে পরিচালিত হয় — নির্দিষ্ট কর্মশালার তথ্য আমাদের ক্যালেন্ডারে পাওয়া যাবে।",
+    },
+    {
+      q: "আমি কি ব্যক্তিগতভাবে সাহায্য পেতে পারি?",
+      a: "হ্যাঁ — নির্দিষ্ট শর্তের মধ্যে আমরা প্রয়োজনভিত্তিক সহায়তা প্রদান করি। দয়া করে যোগাযোগ ফর্মের মাধ্যমে আপনার প্রয়োজন উল্লেখ করুন।",
+    },
+    {
+      q: "আপনার প্রকল্পগুলোতে অর্থনৈতিক স্বচ্ছতা কেমন?",
+      a: "আমরা দান এবং ব্যয় সংক্রান্ত প্রতিবেদন নিয়মিত প্রকাশ করি; বড় মাপকাঠির প্রকল্পের জন্য অডিট রিপোর্টও পাওয়া যায়।",
+    },
+    {
+      q: "ডোনেশন রসিদ কীভাবে পাওয়া যাবে?",
+      a: "অনলাইন দানের ক্ষেত্রে ইমেইলে রসিদ পাঠানো হয়; ব্যাংক ট্রান্সফারের ক্ষেত্রে অনুরোধ করলে রসিদ প্রদান করা হবে।",
+    },
+    {
+      q: "আমি কীভাবে আপনার সঙ্গে যোগাযোগ করব জরুরি ক্ষেত্রে?",
+      a: "জরুরি যোগাযোগের জন্য উপরের ফোন নম্বরে কল করুন অথবা ইমেইল করলে দ্রুত প্রতিক্রিয়া দেওয়া হবে।",
+    },
+    {
+      q: "আপনি কোন অঞ্চলে কাজ করেন?",
+      a: "আমরা মূলত ঢাকা ও আশেপাশের অঞ্চলে কাজ করি, তবে বিশেষ প্রয়োজনে অন্যান্য অঞ্চলেও সাহায্য পৌঁছে দিই।",
+    },
+  ];
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -22,19 +67,54 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Page Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-            যোগাযোগ করুন
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            আপনার যেকোনো প্রশ্ন বা পরামর্শের জন্য আমাদের সাথে যোগাযোগ করুন। আমরা
-            আপনার সেবায় সর্বদা প্রস্তুত।
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Page Header (full width background) */}
+      <TitleBg
+        title="যোগাযোগ করুন"
+        subtitle={
+          "আপনার যেকোনো প্রশ্ন বা পরামর্শের জন্য আমাদের সাথে যোগাযোগ করুন। আমরা আপনার সেবায় সর্বদা প্রস্তুত।"
+        }
+        image={
+          "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=2070&auto=format&fit=crop"
+        }
+      />
 
+      {/* FAQ Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">প্রশ্ন ও উত্তর (FAQ)</h2>
+
+          <div className="space-y-3">
+            {faqs.map((f, idx) => {
+              const open = openFaq === idx;
+              return (
+                <div key={idx} className="overflow-hidden rounded-lg border border-gray-100">
+                  <button
+                    onClick={() => setOpenFaq(open ? null : idx)}
+                    className="w-full flex items-center justify-between px-4 py-3 text-left bg-white hover:bg-gray-50"
+                  >
+                    <span className="text-gray-800 font-medium">{f.q}</span>
+                    <svg
+                      className={`w-5 h-5 text-green-700 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  <div className={`px-4 ${open ? "max-h-96 py-4 opacity-100" : "max-h-0 py-0 opacity-0"} transition-all duration-300 overflow-hidden bg-white`}>
+                    <p className="text-gray-700">{f.a}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Left: Contact Form */}
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">

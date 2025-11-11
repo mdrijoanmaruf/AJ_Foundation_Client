@@ -28,7 +28,7 @@ const Navbar = () => {
 
   return (
   <header className="absolute top-6 left-0 right-0 z-50 w-full pointer-events-auto">
-    <nav className="max-w-7xl bg-white shadow-lg border border-white/30 rounded-xl mx-auto flex items-center justify-between gap-3 px-4 sm:px-6 py-3">
+    <nav className="max-w-7xl bg-white shadow-lg border border-white/30 rounded-xl mx-auto flex items-center justify-between gap-3 px-4 sm:px-6 py-4">
         {/* Left: Logo */}
         <Link
           href="/"
