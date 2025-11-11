@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 type NavItem = {
   label: string;
@@ -25,10 +25,37 @@ const Navbar = () => {
   };
 
   const [open, setOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Show navbar if scrolling up or at the very top
+      if (currentScrollY < lastScrollY || currentScrollY < 100) {
+        setIsVisible(true);
+      } 
+      // Hide navbar if scrolling down and past 100px
+      else if (currentScrollY > 100 && currentScrollY > lastScrollY) {
+        setIsVisible(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [lastScrollY]);
 
   return (
-  <header className="absolute top-6 left-0 right-0 z-50 w-full pointer-events-auto">
-    <nav className="max-w-7xl bg-white shadow-lg border border-white/30 rounded-xl mx-auto flex items-center justify-between gap-3 px-4 sm:px-6 py-4">
+  <header className={`fixed top-0 left-0 right-0 z-50 px-2 md:px-0 w-full pointer-events-auto transition-transform duration-300 ${
+    isVisible ? 'translate-y-0' : '-translate-y-full'
+  }`}>
+    <nav className="max-w-7xl bg-white shadow-lg border border-white/30 rounded-xl mx-auto flex items-center justify-between gap-3 px-4 sm:px-6 py-4 mt-6">
         {/* Left: Logo */}
         <Link
           href="/"
@@ -93,7 +120,7 @@ const Navbar = () => {
           >
             {/* Icon: hamburger -> X */}
             <svg
-              className={`h-6 w-6 transition-transform duration-200 ${open ? "rotate-45" : ""}`}
+              className="h-6 w-6 transition-all duration-200"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -102,8 +129,10 @@ const Navbar = () => {
               strokeLinejoin="round"
             >
               {open ? (
-                <path d="M6 18L18 6M6 6l12 12" />
+                // Cross icon
+                <path d="M18 6L6 18M6 6l12 12" />
               ) : (
+                // Hamburger icon
                 <>
                   <path d="M3 7h18" />
                   <path d="M3 12h18" />
@@ -120,7 +149,7 @@ const Navbar = () => {
           className={`max-w-7xl mx-auto px-4 sm:px-6 transition-all duration-300 overflow-hidden ${open ? "max-h-[480px] py-4 opacity-100" : "max-h-0 opacity-0 py-0"}`}
           aria-hidden={!open}
         >
-          <div className="bg-white/95 supports-backdrop-filter:bg-white/70 backdrop-blur rounded-b-xl shadow-md border border-white/30">
+          <div className="bg-white rounded-b-xl shadow-md border border-gray-200">
             <div className="flex flex-col divide-y divide-gray-100">
               <div className="px-4 py-3">
                 {navItems.map((item) => {

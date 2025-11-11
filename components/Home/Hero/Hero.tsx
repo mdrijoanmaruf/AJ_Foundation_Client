@@ -16,7 +16,7 @@ const Hero = () => {
       </div>
 
       {/* Content Container */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-[600px] lg:min-h-[700px] flex items-center">
+      <div className="relative max-w-7xl mx-auto px-4 md:px-0 h-full min-h-[600px] lg:min-h-[700px] flex items-center">
         <div className="max-w-2xl py-16">
           {/* Main Heading */}
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
