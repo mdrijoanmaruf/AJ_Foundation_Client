@@ -26,6 +26,8 @@ const Gallery = () => {
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [lightboxImageLoaded, setLightboxImageLoaded] = useState(false);
+  const [lightboxImageSrc, setLightboxImageSrc] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"photos" | "videos">("photos");
 
   useEffect(() => {
@@ -40,6 +42,17 @@ const Gallery = () => {
       fetchAllImages();
     }
   }, [selectedTopic, topics]);
+
+  // Preload first few images for better performance
+  useEffect(() => {
+    if (images.length > 0) {
+      // Preload first 3 images
+      images.slice(0, 3).forEach((image) => {
+        const img = new window.Image();
+        img.src = image.imageUrl;
+      });
+    }
+  }, [images]);
 
   const fetchTopics = async () => {
     try {
@@ -84,22 +97,74 @@ const Gallery = () => {
 
   const handleImageClick = (imageIndex: number) => {
     setSelectedImageIndex(imageIndex);
+    setLightboxImageLoaded(false);
+
+    // Preload the full image
+    const img = new window.Image();
+    img.onload = () => {
+      setLightboxImageSrc(images[imageIndex].imageUrl);
+      setLightboxImageLoaded(true);
+    };
+    img.src = images[imageIndex].imageUrl;
+
+    // Preload adjacent images for faster navigation
+    preloadAdjacentImages(imageIndex);
+  };
+
+  const preloadAdjacentImages = (currentIndex: number) => {
+    // Preload previous image
+    if (currentIndex > 0) {
+      const prevImg = new window.Image();
+      prevImg.src = images[currentIndex - 1].imageUrl;
+    }
+
+    // Preload next image
+    if (currentIndex < images.length - 1) {
+      const nextImg = new window.Image();
+      nextImg.src = images[currentIndex + 1].imageUrl;
+    }
   };
 
   const handleNextImage = () => {
     if (selectedImageIndex !== null && selectedImageIndex < images.length - 1) {
-      setSelectedImageIndex(selectedImageIndex + 1);
+      const nextIndex = selectedImageIndex + 1;
+      setSelectedImageIndex(nextIndex);
+      setLightboxImageLoaded(false);
+
+      // Check if next image is already preloaded
+      const img = new window.Image();
+      img.onload = () => {
+        setLightboxImageSrc(images[nextIndex].imageUrl);
+        setLightboxImageLoaded(true);
+      };
+      img.src = images[nextIndex].imageUrl;
+
+      preloadAdjacentImages(nextIndex);
     }
   };
 
   const handlePrevImage = () => {
     if (selectedImageIndex !== null && selectedImageIndex > 0) {
-      setSelectedImageIndex(selectedImageIndex - 1);
+      const prevIndex = selectedImageIndex - 1;
+      setSelectedImageIndex(prevIndex);
+      setLightboxImageLoaded(false);
+
+      // Check if previous image is already preloaded
+      const img = new window.Image();
+      img.onload = () => {
+        setLightboxImageSrc(images[prevIndex].imageUrl);
+        setLightboxImageLoaded(true);
+      };
+      img.src = images[prevIndex].imageUrl;
+
+      preloadAdjacentImages(prevIndex);
     }
   };
 
   const handleCloseLightbox = () => {
     setSelectedImageIndex(null);
+    setLightboxImageLoaded(false);
+    setLightboxImageSrc("");
   };
 
   if (loading) {
@@ -332,16 +397,43 @@ const Gallery = () => {
             {selectedImageIndex + 1} / {images.length}
           </div>
 
-          {/* Main Image */}
-          <div className="max-w-5xl w-full">
-            <Image
-              src={images[selectedImageIndex].imageUrl}
-              alt={images[selectedImageIndex].title || "Gallery image"}
-              width={1200}
-              height={800}
-              className="w-full h-auto rounded-lg"
-              onClick={(e) => e.stopPropagation()}
-            />
+          {/* Main Image (centered, thumbnail-first then full image) */}
+          <div className="max-w-5xl w-full flex items-center justify-center">
+            <div className="relative">
+              {/* Loading state (covers image area) */}
+              {!lightboxImageLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-900 rounded-lg z-20">
+                  <div className="text-white text-center">
+                    <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p>ছবি লোড হচ্ছে...</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Thumbnail (shown immediately) */}
+              <Image
+                src={images[selectedImageIndex].thumbnailUrl || images[selectedImageIndex].imageUrl}
+                alt={images[selectedImageIndex].title || "Gallery image"}
+                width={1200}
+                height={800}
+                className={`max-w-[90vw] max-h-[80vh] rounded-lg transition-opacity duration-300 ${
+                  lightboxImageLoaded ? 'opacity-0' : 'opacity-100'
+                }`}
+                onClick={(e) => e.stopPropagation()}
+              />
+
+              {/* Full image (shown after loading) */}
+              {lightboxImageLoaded && (
+                <Image
+                  src={lightboxImageSrc}
+                  alt={images[selectedImageIndex].title || "Gallery image"}
+                  width={1200}
+                  height={800}
+                  className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-[90vw] max-h-[80vh] rounded-lg transition-opacity duration-300 opacity-100 z-10"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              )}
+            </div>
           </div>
         </div>
       )}

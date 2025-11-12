@@ -25,7 +25,7 @@ const AdminGallery = () => {
   const { data: session } = useSession();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [images, setImages] = useState<GalleryImage[]>([]);
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<string | null>('all');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [showTopicModal, setShowTopicModal] = useState(false);
@@ -38,10 +38,22 @@ const AdminGallery = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedTopic) {
+    if (selectedTopic === 'all') {
+      fetchAllImages();
+    } else if (selectedTopic) {
       fetchImages(selectedTopic);
     }
   }, [selectedTopic]);
+
+  const fetchAllImages = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/images`);
+      const data = await response.json();
+      setImages(data.data);
+    } catch (error) {
+      console.error("Error fetching all images:", error);
+    }
+  };
 
   const getAuthToken = () => {
     if (session && (session as any).token) {
@@ -116,13 +128,40 @@ const AdminGallery = () => {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files);
-      setNewImage({ ...newImage, files: filesArray });
+
+      // Validate file types and sizes
+      const validFiles = filesArray.filter(file => {
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        const maxSize = 10 * 1024 * 1024; // 10MB
+
+        if (!validTypes.includes(file.type)) {
+          Swal.fire({
+            icon: "error",
+            title: "অবৈধ ফাইল",
+            text: `${file.name} একটি বৈধ ছবি ফাইল নয়। শুধুমাত্র JPG, PNG, GIF, WebP ফাইল গ্রহণযোগ্য।`,
+          });
+          return false;
+        }
+
+        if (file.size > maxSize) {
+          Swal.fire({
+            icon: "error",
+            title: "ফাইল খুব বড়",
+            text: `${file.name} এর আকার 10MB এর বেশি। অনুগ্রহ করে ছোট আকারের ছবি ব্যবহার করুন।`,
+          });
+          return false;
+        }
+
+        return true;
+      });
+
+      setNewImage({ ...newImage, files: validFiles });
     }
   };
 
   const handleUploadImage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newImage.files.length || !selectedTopic) return;
+    if (!newImage.files.length || !selectedTopic || selectedTopic === 'all') return;
 
     setUploading(true);
     const token = getAuthToken();
@@ -185,7 +224,11 @@ const AdminGallery = () => {
       setNewImage({ title: "", files: [] });
       setShowUploadModal(false);
       setUploading(false);
-      if (selectedTopic) fetchImages(selectedTopic);
+      if (selectedTopic === 'all') {
+        fetchAllImages();
+      } else if (selectedTopic) {
+        fetchImages(selectedTopic);
+      }
     } catch (error) {
       console.error("Upload error:", error);
       Swal.fire({
@@ -231,7 +274,11 @@ const AdminGallery = () => {
           timer: 1500,
         });
 
-        if (selectedTopic) fetchImages(selectedTopic);
+        if (selectedTopic === 'all') {
+          fetchAllImages();
+        } else if (selectedTopic) {
+          fetchImages(selectedTopic);
+        }
       } catch (error) {
         Swal.fire({
           icon: "error",
@@ -276,7 +323,7 @@ const AdminGallery = () => {
           timer: 1500,
         });
 
-        setSelectedTopic(null);
+            setSelectedTopic('all');
         fetchTopics();
       } catch (error) {
         Swal.fire({
@@ -316,7 +363,7 @@ const AdminGallery = () => {
           </button>
           <button
             onClick={() => setShowUploadModal(true)}
-            disabled={!selectedTopic}
+          disabled={!selectedTopic || selectedTopic === 'all'}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -327,51 +374,64 @@ const AdminGallery = () => {
         </div>
       </div>
 
-      {/* Topics and Images */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Topics Sidebar */}
-        <div className="lg:col-span-1 bg-white rounded-lg shadow-md border border-gray-200 p-4">
-          <h3 className="font-semibold text-gray-900 mb-4">টপিক সমূহ</h3>
-          <div className="space-y-2">
+      {/* Topics (top) and Images */}
+      <div className="space-y-4">
+        {/* Topics chip list */}
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-900">টপিক সমূহ</h3>
+            <div className="text-sm text-gray-500">{topics.length}টি টপিক</div>
+          </div>
+          <div className="flex gap-2 overflow-x-auto py-1">
+            <button
+              onClick={() => {
+                setSelectedTopic('all');
+                fetchAllImages();
+              }}
+              className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                selectedTopic === 'all' ? "bg-green-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              সব ছবি
+            </button>
+
             {topics.map((topic) => (
-              <div
-                key={topic._id}
-                className={`p-3 rounded-lg cursor-pointer transition-colors group ${
-                  selectedTopic === topic._id
-                    ? "bg-green-50 border border-green-300"
-                    : "bg-gray-50 hover:bg-gray-100"
-                }`}
-              >
-                <div
+              <div key={topic._id} className="relative shrink-0 group">
+                <button
                   onClick={() => setSelectedTopic(topic._id)}
-                  className="flex items-center justify-between"
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition duration-150 transform ${
+                    selectedTopic === topic._id ? "bg-green-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  } group-hover:scale-105`}
                 >
-                  <span className="font-medium text-gray-900">{topic.name}</span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteTopic(topic._id);
-                    }}
-                    className="text-red-600 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
+                  {topic.name}
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleDeleteTopic(topic._id); }}
+                  title="ডিলিট"
+                  aria-label={`Delete ${topic.name}`}
+                  className="absolute -right-2 -top-2 text-red-600 hover:text-red-700 p-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full shadow"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
               </div>
             ))}
+
             {topics.length === 0 && (
-              <p className="text-gray-500 text-sm text-center py-4">কোন টপিক নেই</p>
+              <div className="text-gray-500 text-sm">কোন টপিক নেই</div>
             )}
           </div>
         </div>
 
         {/* Images Grid */}
-        <div className="lg:col-span-3 bg-white rounded-lg shadow-md border border-gray-200 p-6">
-          <h3 className="font-semibold text-gray-900 mb-4">ছবি সমূহ</h3>
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-900">ছবি সমূহ</h3>
+            <div className="text-sm text-gray-500">{images.length}টি ছবি</div>
+          </div>
           {selectedTopic ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {images.map((image) => (
                 <div key={image._id} className="relative group">
                   <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
@@ -494,11 +554,14 @@ const AdminGallery = () => {
                 <input
                   type="file"
                   required
-                  accept="image/*"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                   multiple
                   onChange={handleImageSelect}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  সর্বোচ্চ 10MB প্রতি ছবি, JPG, PNG, GIF, WebP ফরম্যাট সমর্থিত
+                </p>
                 {newImage.files.length > 0 && (
                   <p className="text-sm text-gray-600 mt-2">
                     {newImage.files.length}টি ছবি নির্বাচিত

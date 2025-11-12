@@ -148,14 +148,21 @@ const Navbar = () => {
           {/* Admin link visible only to admin users */}
           {isAdmin && (
             <li className="font-semibold">
+              {/* Distinct admin pill/button */}
               <Link
                 href="/admin"
                 className={
-                  "relative inline-flex items-center pb-1 text-[15px] transition-colors text-gray-700 hover:text-gray-900"
+                  "inline-flex items-center gap-3 px-3 py-1 rounded-full text-sm transition-all focus:outline-none focus:ring-2 focus:ring-green-600/20" +
+                  (isActive('/admin')
+                    ? ' text-green-700 font-semibold ring-1 ring-green-700/10'
+                    : ' text-green-700 hover:text-green-800')
                 }
+                aria-current={isActive('/admin') ? 'page' : undefined}
               >
-                অ্যাডমিন
-                <span className="absolute left-0 -bottom-0.5 h-0.5 w-full rounded-full transition-opacity opacity-0" />
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2l3 6 6 .5-4.5 4 1 6-5.5-3-5.5 3 1-6L3 8.5 9 8 12 2z" />
+                </svg>
+                <span className="font-semibold text-sm">অ্যাডমিন</span>
               </Link>
             </li>
           )}
@@ -343,7 +350,7 @@ const Navbar = () => {
                       <Link
                         href="/admin"
                         onClick={() => setOpen(false)}
-                        className="block w-full text-center py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+                        className={`block w-full text-center py-3 rounded-md font-semibold ${isActive('/admin') ? 'text-green-700' : 'border border-gray-300 text-green-700 hover:bg-green-50'}`}
                       >
                         অ্যাডমিন প্যানেল
                       </Link>
