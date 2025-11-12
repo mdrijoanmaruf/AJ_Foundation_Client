@@ -39,6 +39,7 @@ const handler = NextAuth({
               name: data.user.name,
               email: data.user.email,
               image: data.user.image,
+              role: data.user.role,
               token: data.token,
             };
           }
@@ -73,6 +74,7 @@ const handler = NextAuth({
           if (res.ok && data.user) {
             (user as any).id = data.user.id;
             (user as any).token = data.token;
+            (user as any).role = data.user.role;
             return true;
           }
 
@@ -89,6 +91,7 @@ const handler = NextAuth({
       if (user) {
         token.id = user.id;
         token.token = (user as any).token;
+        if ((user as any).role) token.role = (user as any).role;
       }
       return token;
     },
@@ -96,6 +99,7 @@ const handler = NextAuth({
       if (session.user) {
         (session.user as any).id = token.id;
         (session as any).token = token.token;
+        if ((token as any).role) (session.user as any).role = (token as any).role;
       }
       return session;
     },

@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar/Navbar";
-import Footer from "@/components/Footer/Footer";
-import WhatsApp from "@/components/WhatsApp/WhatsApp";
 import SessionProvider from "@/components/SessionProvider";
+import LayoutContent from "@/components/LayoutContent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,10 +31,7 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         <SessionProvider>
-          <Navbar />
-          <div className="">{children}</div>
-          <Footer />
-          <WhatsApp />
+          <LayoutContent>{children}</LayoutContent>
         </SessionProvider>
       </body>
     </html>

@@ -142,6 +142,21 @@ const Navbar = () => {
               </li>
             );
           })}
+
+          {/* Admin link visible only to admin users */}
+          {session?.user && (session.user as any).role === "admin" && (
+            <li className="font-semibold">
+              <Link
+                href="/admin"
+                className={
+                  "relative inline-flex items-center pb-1 text-[15px] transition-colors text-gray-700 hover:text-gray-900"
+                }
+              >
+                অ্যাডমিন
+                <span className="absolute left-0 -bottom-0.5 h-0.5 w-full rounded-full transition-opacity opacity-0" />
+              </Link>
+            </li>
+          )}
         </ul>
 
         {/* Right: Auth buttons (desktop) and Mobile menu button */}
@@ -189,6 +204,15 @@ const Navbar = () => {
                   >
                     প্রোফাইল
                   </Link>
+                  {(session.user as any)?.role === "admin" && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      অ্যাডমিন প্যানেল
+                    </Link>
+                  )}
                   <button
                     onClick={() => {
                       setShowProfileMenu(false);
@@ -313,6 +337,15 @@ const Navbar = () => {
                     >
                       প্রোফাইল
                     </Link>
+                    {(session.user as any)?.role === "admin" && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setOpen(false)}
+                        className="block w-full text-center py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      >
+                        অ্যাডমিন প্যানেল
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         setOpen(false);
