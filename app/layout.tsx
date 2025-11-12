@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar/Navbar";
 import Footer from "@/components/Footer/Footer";
 import WhatsApp from "@/components/WhatsApp/WhatsApp";
+import SessionProvider from "@/components/SessionProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,10 +32,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white`}
         suppressHydrationWarning={true}
       >
-        <Navbar />
-        <div className="">{children}</div>
-        <Footer />
-        <WhatsApp />
+        <SessionProvider>
+          <Navbar />
+          <div className="">{children}</div>
+          <Footer />
+          <WhatsApp />
+        </SessionProvider>
       </body>
     </html>
   );
