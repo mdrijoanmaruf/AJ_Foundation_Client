@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import Swal from "sweetalert2";
+import { useUserRole } from "@/hooks/useUserRole";
 
 type NavItem = {
   label: string;
@@ -22,6 +23,7 @@ const navItems: NavItem[] = [
 const Navbar = () => {
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const { isAdmin } = useUserRole();
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -144,7 +146,7 @@ const Navbar = () => {
           })}
 
           {/* Admin link visible only to admin users */}
-          {session?.user && (session.user as any).role === "admin" && (
+          {isAdmin && (
             <li className="font-semibold">
               <Link
                 href="/admin"
@@ -204,7 +206,7 @@ const Navbar = () => {
                   >
                     প্রোফাইল
                   </Link>
-                  {(session.user as any)?.role === "admin" && (
+                  {isAdmin && (
                     <Link
                       href="/admin"
                       onClick={() => setShowProfileMenu(false)}
@@ -337,7 +339,7 @@ const Navbar = () => {
                     >
                       প্রোফাইল
                     </Link>
-                    {(session.user as any)?.role === "admin" && (
+                    {isAdmin && (
                       <Link
                         href="/admin"
                         onClick={() => setOpen(false)}
