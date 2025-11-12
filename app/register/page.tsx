@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Swal from "sweetalert2";
 
 export default function Register() {
   const router = useRouter();
@@ -76,6 +77,14 @@ export default function Register() {
         return;
       }
 
+      await Swal.fire({
+        icon: "success",
+        title: "রেজিস্ট্রেশন সফল হয়েছে!",
+        text: "আপনি সফলভাবে অ্যাকাউন্ট তৈরি করেছেন",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+
       router.push("/");
       router.refresh();
     } catch (error) {
@@ -90,6 +99,10 @@ export default function Register() {
     setLoading(true);
 
     try {
+      try {
+        sessionStorage.setItem("aj_show_login_alert", "1");
+      } catch (e) {}
+
       await signIn("google", {
         callbackUrl: "/",
       });

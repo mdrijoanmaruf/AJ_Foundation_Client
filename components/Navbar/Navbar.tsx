@@ -2,6 +2,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState, useEffect } from "react";
+import { useSession, signOut } from "next-auth/react";
+import Image from "next/image";
+import Swal from "sweetalert2";
 
 type NavItem = {
   label: string;
@@ -18,15 +21,62 @@ const navItems: NavItem[] = [
 
 const Navbar = () => {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname?.startsWith(href);
   };
 
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: "লগআউট করবেন?",
+      text: "আপনি কি নিশ্চিত যে আপনি লগআউট করতে চান?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#15803d",
+      cancelButtonColor: "#dc2626",
+      confirmButtonText: "হ্যাঁ, লগআউট করুন",
+      cancelButtonText: "না",
+    });
+
+    if (result.isConfirmed) {
+      await signOut({ redirect: false });
+      await Swal.fire({
+        icon: "success",
+        title: "লগআউট সফল হয়েছে!",
+        text: "আপনি সফলভাবে লগআউট করেছেন",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    }
+  };
+
   const [open, setOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  // show login success alert after OAuth redirect (flag set before redirect)
+  const loginAlertShownRef = React.useRef(false);
+  useEffect(() => {
+    try {
+      const flag = sessionStorage.getItem("aj_show_login_alert");
+      if (flag === "1" && status === "authenticated" && !loginAlertShownRef.current) {
+        Swal.fire({
+          icon: "success",
+          title: "লগইন সফল হয়েছে!",
+          text: "আপনি সফলভাবে লগইন করেছেন",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        loginAlertShownRef.current = true;
+        sessionStorage.removeItem("aj_show_login_alert");
+      }
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [status, session]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -96,18 +146,77 @@ const Navbar = () => {
 
         {/* Right: Auth buttons (desktop) and Mobile menu button */}
         <div className="hidden md:flex items-center gap-2 sm:gap-3">
-          <Link
-            href="/login"
-            className="px-3 sm:px-4 py-1.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            Login
-          </Link>
-          <Link
-            href="/register"
-            className="px-3 sm:px-4 py-1.5 rounded-lg bg-green-700 text-white text-sm font-medium hover:bg-green-800"
-          >
-            Register
-          </Link>
+          {status === "loading" ? (
+            <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
+          ) : session ? (
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition"
+              >
+                {session.user?.image ? (
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name || "User"}
+                    width={24}
+                    height={24}
+                    className="rounded-full"
+                  />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-semibold">
+                    {session.user?.name?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                )}
+                <span className="text-sm font-medium text-gray-700">
+                  {session.user?.name || "User"}
+                </span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${showProfileMenu ? "rotate-180" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {showProfileMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                  <Link
+                    href="/profile"
+                    onClick={() => setShowProfileMenu(false)}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    প্রোফাইল
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      handleLogout();
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                  >
+                    লগআউট
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="px-3 sm:px-4 py-1.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="px-3 sm:px-4 py-1.5 rounded-lg bg-green-700 text-white text-sm font-medium hover:bg-green-800"
+              >
+                Register
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile: hamburger */}
@@ -170,20 +279,68 @@ const Navbar = () => {
               </div>
 
               <div className="px-4 py-3 flex flex-col gap-2">
-                <Link
-                  href="/login"
-                  onClick={() => setOpen(false)}
-                  className="block w-full text-center py-2 rounded-md border border-gray-300 text-gray-700"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setOpen(false)}
-                  className="block w-full text-center py-2 rounded-md bg-green-700 text-white"
-                >
-                  Register
-                </Link>
+                {status === "loading" ? (
+                  <div className="w-full h-10 rounded-md bg-gray-200 animate-pulse"></div>
+                ) : session ? (
+                  <>
+                    <div className="flex items-center gap-3 px-3 py-2 border-b border-gray-200">
+                      {session.user?.image ? (
+                        <Image
+                          src={session.user.image}
+                          alt={session.user.name || "User"}
+                          width={40}
+                          height={40}
+                          className="rounded-full"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-white font-semibold">
+                          {session.user?.name?.charAt(0).toUpperCase() || "U"}
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-900">
+                          {session.user?.name || "User"}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {session.user?.email}
+                        </p>
+                      </div>
+                    </div>
+                    <Link
+                      href="/profile"
+                      onClick={() => setOpen(false)}
+                      className="block w-full text-center py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+                    >
+                      প্রোফাইল
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setOpen(false);
+                        handleLogout();
+                      }}
+                      className="block w-full text-center py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
+                    >
+                      লগআউট
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={() => setOpen(false)}
+                      className="block w-full text-center py-2 rounded-md border border-gray-300 text-gray-700"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      href="/register"
+                      onClick={() => setOpen(false)}
+                      className="block w-full text-center py-2 rounded-md bg-green-700 text-white"
+                    >
+                      Register
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import Swal from "sweetalert2";
 
 export default function Login() {
   const router = useRouter();
@@ -40,6 +41,14 @@ export default function Login() {
         return;
       }
 
+      await Swal.fire({
+        icon: "success",
+        title: "লগইন সফল হয়েছে!",
+        text: "আপনি সফলভাবে লগইন করেছেন",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+
       router.push("/");
       router.refresh();
     } catch (error) {
@@ -52,8 +61,15 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     setError("");
     setLoading(true);
-
     try {
+      // set a flag so when the user is redirected back after OAuth we can show a success alert
+      try {
+        sessionStorage.setItem("aj_show_login_alert", "1");
+      } catch (e) {
+        // ignore storage errors
+      }
+
+      // Redirect to Google sign-in (NextAuth will handle the redirect)
       await signIn("google", {
         callbackUrl: "/",
       });
