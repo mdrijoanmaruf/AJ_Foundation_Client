@@ -24,12 +24,22 @@ const HomeGallery = () => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/gallery/images`
       );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       // Get first 6 images for home page
-      setImages(data.data.slice(0, 6));
+      if (data && data.data && Array.isArray(data.data)) {
+        setImages(data.data.slice(0, 6));
+      } else {
+        setImages([]);
+      }
       setLoading(false);
     } catch (error) {
       console.error("Error fetching gallery images:", error);
+      setImages([]);
       setLoading(false);
     }
   };

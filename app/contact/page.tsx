@@ -121,40 +121,7 @@ const Contact = () => {
         }
       />
 
-      {/* FAQ Section */}
-      <div className="max-w-7xl mx-auto px-4 md:px-0 py-12">
-        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">প্রশ্ন ও উত্তর (FAQ)</h2>
-
-          <div className="space-y-3">
-            {faqs.map((f, idx) => {
-              const open = openFaq === idx;
-              return (
-                <div key={idx} className="overflow-hidden rounded-lg border border-gray-100">
-                  <button
-                    onClick={() => setOpenFaq(open ? null : idx)}
-                    className="w-full flex items-center justify-between px-4 py-3 text-left bg-white hover:bg-gray-50"
-                  >
-                    <span className="text-gray-800 font-medium">{f.q}</span>
-                    <svg
-                      className={`w-5 h-5 text-green-700 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-
-                  <div className={`px-4 ${open ? "max-h-96 py-4 opacity-100" : "max-h-0 py-0 opacity-0"} transition-all duration-300 overflow-hidden bg-white`}>
-                    <p className="text-gray-700">{f.a}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+   
 
       <div className="max-w-7xl mx-auto px-4 md:px-0 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
@@ -387,6 +354,41 @@ const Contact = () => {
                 />
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ Section */}
+      <div className="max-w-7xl mx-auto px-4 md:px-0 py-12">
+        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">প্রশ্ন ও উত্তর (FAQ)</h2>
+
+          <div className="space-y-3">
+            {faqs.map((f, idx) => {
+              const open = openFaq === idx;
+              return (
+                <div key={idx} className="overflow-hidden rounded-lg border border-gray-100">
+                  <button
+                    onClick={() => setOpenFaq(open ? null : idx)}
+                    className="w-full flex items-center justify-between px-4 py-3 text-left bg-white hover:bg-gray-50"
+                  >
+                    <span className="text-gray-800 font-medium">{f.q}</span>
+                    <svg
+                      className={`w-5 h-5 text-green-700 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  <div className={`px-4 ${open ? "max-h-96 py-4 opacity-100" : "max-h-0 py-0 opacity-0"} transition-all duration-300 overflow-hidden bg-white`}>
+                    <p className="text-gray-700">{f.a}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

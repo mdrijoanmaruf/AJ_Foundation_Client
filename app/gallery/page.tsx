@@ -57,11 +57,21 @@ const Gallery = () => {
   const fetchTopics = async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/topics`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      setTopics(data.data);
+      if (data && data.data && Array.isArray(data.data)) {
+        setTopics(data.data);
+      } else {
+        setTopics([]);
+      }
       setLoading(false);
     } catch (error) {
       console.error("Error fetching topics:", error);
+      setTopics([]);
       setLoading(false);
     }
   };
@@ -71,20 +81,40 @@ const Gallery = () => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/gallery/images/${topicId}`
       );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      setImages(data.data);
+      if (data && data.data && Array.isArray(data.data)) {
+        setImages(data.data);
+      } else {
+        setImages([]);
+      }
     } catch (error) {
       console.error("Error fetching images:", error);
+      setImages([]);
     }
   };
 
   const fetchAllImages = async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/images`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      setImages(data.data);
+      if (data && data.data && Array.isArray(data.data)) {
+        setImages(data.data);
+      } else {
+        setImages([]);
+      }
     } catch (error) {
       console.error("Error fetching images:", error);
+      setImages([]);
     }
   };
 
@@ -184,7 +214,7 @@ const Gallery = () => {
         className="mb-8"
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="max-w-7xl mx-auto px-4 md:px-0 pb-16">
 
         {/* Tabs */}
         <div className="flex justify-center mb-8">
