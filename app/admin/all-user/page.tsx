@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Swal from "sweetalert2";
@@ -20,6 +20,8 @@ const AllUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "user">("all");
 
   useEffect(() => {
     if (session) {
@@ -63,6 +65,25 @@ const AllUsers = () => {
       setLoading(false);
     }
   };
+
+  const filteredUsers = useMemo(() => {
+    let list = users.slice();
+
+    if (roleFilter === "admin") list = list.filter((u) => u.role === "admin");
+    else if (roleFilter === "user") list = list.filter((u) => u.role === "user");
+
+    const q = searchQuery.trim().toLowerCase();
+    if (q) {
+      list = list.filter((u) => {
+        return (
+          (u.name || "").toLowerCase().includes(q) ||
+          (u.email || "").toLowerCase().includes(q)
+        );
+      });
+    }
+
+    return list;
+  }, [users, searchQuery, roleFilter]);
 
   const handleRoleToggle = async (userId: string, currentRole: string) => {
     const newRole = currentRole === "admin" ? "user" : "admin";
@@ -134,12 +155,51 @@ const AllUsers = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">সকল ব্যবহারকারী</h1>
           <p className="text-sm text-gray-500 mt-1">
-            মোট ব্যবহারকারী: {users.length}
+            মোট ব্যবহারকারী: {users.length} | প্রদর্শিত: {filteredUsers.length}
           </p>
+        </div>
+
+        <div className="flex gap-2 items-center w-full sm:w-auto">
+          <div className="relative flex-1">
+            <svg
+              aria-hidden="true"
+              className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+            </svg>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="অনুসন্ধান করুন "
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none"
+            />
+          </div>
+
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value as any)}
+            className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm"
+          >
+            <option value="all">সব</option>
+            <option value="admin">অ্যাডমিন</option>
+            <option value="user">ব্যবহারকারী</option>
+          </select>
+
+          {/* <button
+            onClick={() => { setSearchQuery(""); setRoleFilter("all"); }}
+            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm"
+            title="Clear filters"
+          >
+            রিসেট
+          </button> */}
         </div>
       </div>
 
@@ -170,7 +230,7 @@ const AllUsers = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr
                   key={user._id}
                   className={`hover:bg-gray-50 transition-colors ${
@@ -273,9 +333,9 @@ const AllUsers = () => {
         </div>
 
         {/* Empty State */}
-        {users.length === 0 && (
+        {filteredUsers.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">কোন ব্যবহারকারী পাওয়া যায়নি</p>
+            <p className="text-gray-500 text-lg">কোনো মিল পাওয়া যায়নি</p>
           </div>
         )}
       </div>

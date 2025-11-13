@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import Swal from "sweetalert2";
 
@@ -19,12 +19,33 @@ const Messages = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (session) {
       fetchMessages();
     }
   }, [session]);
+
+  const filteredMessages = useMemo(() => {
+    let list = messages.slice();
+
+    // only search is applied (read/unread filter removed)
+
+    const q = searchQuery.trim().toLowerCase();
+    if (q) {
+      list = list.filter((m) => {
+        return (
+          (m.name || "").toLowerCase().includes(q) ||
+          (m.email || "").toLowerCase().includes(q) ||
+          (m.subject || "").toLowerCase().includes(q) ||
+          (m.message || "").toLowerCase().includes(q)
+        );
+      });
+    }
+
+    return list;
+  }, [messages, searchQuery]);
 
   const getAuthToken = () => {
     if (session && (session as any).token) {
@@ -152,12 +173,34 @@ const Messages = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">সকল বার্তা</h1>
           <p className="text-sm text-gray-500 mt-1">
-            মোট বার্তা: {messages.length} | অপঠিত: {messages.filter(m => !m.isRead).length}
+            মোট বার্তা: {messages.length} | অপঠিত: {messages.filter((m) => !m.isRead).length} | প্রদর্শিত: {filteredMessages.length}
           </p>
+        </div>
+
+        <div className="w-full sm:w-auto">
+          <label htmlFor="search" className="sr-only">Search</label>
+          <div className="relative">
+            <svg
+              aria-hidden="true"
+              className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+            </svg>
+            <input
+              id="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="অনুসন্ধান করুন"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none"
+            />
+          </div>
         </div>
       </div>
 
@@ -188,7 +231,7 @@ const Messages = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {messages.map((message) => (
+              {filteredMessages.map((message) => (
                 <tr
                   key={message._id}
                   className={`hover:bg-gray-50 transition-colors ${
@@ -252,7 +295,7 @@ const Messages = () => {
         </div>
 
         {/* Empty State */}
-        {messages.length === 0 && (
+        {filteredMessages.length === 0 && (
           <div className="text-center py-12">
             <svg
               className="w-16 h-16 mx-auto text-gray-400 mb-4"
@@ -267,7 +310,7 @@ const Messages = () => {
                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
               />
             </svg>
-            <p className="text-gray-500 text-lg">কোন বার্তা পাওয়া যায়নি</p>
+            <p className="text-gray-500 text-lg">কোনো মিল পাওয়া যায়নি</p>
           </div>
         )}
       </div>
