@@ -20,7 +20,25 @@ interface GalleryImage {
   createdAt: string;
 }
 
+interface VideoTopic {
+  _id: string;
+  name: string;
+  description: string;
+  createdAt: string;
+}
+
+interface GalleryVideo {
+  _id: string;
+  topic: string;
+  title: string;
+  videoUrl: string;
+  createdAt: string;
+}
+
 const Gallery = () => {
+  const [activeTab, setActiveTab] = useState<"photos" | "videos">("photos");
+  
+  // Photo states
   const [topics, setTopics] = useState<Topic[]>([]);
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
@@ -28,11 +46,21 @@ const Gallery = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const [lightboxImageLoaded, setLightboxImageLoaded] = useState(false);
   const [lightboxImageSrc, setLightboxImageSrc] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"photos" | "videos">("photos");
+  
+  // Video states
+  const [videoTopics, setVideoTopics] = useState<VideoTopic[]>([]);
+  const [videos, setVideos] = useState<GalleryVideo[]>([]);
+  const [selectedVideoTopic, setSelectedVideoTopic] = useState<string | null>(null);
+  const [videoLoading, setVideoLoading] = useState(true);
 
   useEffect(() => {
-    fetchTopics();
-  }, []);
+    if (activeTab === "photos") {
+      fetchTopics();
+    } else {
+      setSelectedVideoTopic(null);
+      fetchVideoTopics();
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     if (selectedTopic) {
@@ -42,6 +70,16 @@ const Gallery = () => {
       fetchAllImages();
     }
   }, [selectedTopic, topics]);
+
+  useEffect(() => {
+    if (selectedVideoTopic) {
+      // Load videos for the selected topic
+      fetchVideos(selectedVideoTopic);
+    } else {
+      // Load all videos (used when selecting "সব ভিডিও")
+      fetchAllVideos();
+    }
+  }, [selectedVideoTopic, videoTopics]);
 
   // Preload first few images for better performance
   useEffect(() => {
@@ -118,11 +156,95 @@ const Gallery = () => {
     }
   };
 
+  const fetchVideoTopics = async () => {
+    try {
+      setVideoLoading(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/video-topics`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (data && data.data && Array.isArray(data.data)) {
+        setVideoTopics(data.data);
+      } else {
+        setVideoTopics([]);
+      }
+      // videoLoading will be controlled by fetchAllVideos/fetchVideos
+    } catch (error) {
+      console.error("Error fetching video topics:", error);
+      setVideoTopics([]);
+      setVideoLoading(false);
+    }
+  };
+
+  const fetchVideos = async (topicId: string) => {
+    try {
+      setVideoLoading(true);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/gallery/videos/${topicId}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (data && data.data && Array.isArray(data.data)) {
+        setVideos(data.data);
+      } else {
+        setVideos([]);
+      }
+      setVideoLoading(false);
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+      setVideos([]);
+      setVideoLoading(false);
+    }
+  };
+
+  const fetchAllVideos = async () => {
+    try {
+      setVideoLoading(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery/videos`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (data && data.data && Array.isArray(data.data)) {
+        setVideos(data.data);
+      } else {
+        setVideos([]);
+      }
+      setVideoLoading(false);
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+      setVideos([]);
+      setVideoLoading(false);
+    }
+  };
+
   const handleTopicSelect = (topicId: string | null) => {
     setSelectedTopic(topicId);
     if (topicId === null) {
       fetchAllImages();
     }
+  };
+
+  const handleVideoTopicSelect = (topicId: string | null) => {
+    setSelectedVideoTopic(topicId);
+    if (topicId === null) {
+      fetchAllVideos();
+    }
+  };
+
+  const getYouTubeVideoId = (url: string): string | null => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
   };
 
   const handleImageClick = (imageIndex: number) => {
@@ -197,7 +319,7 @@ const Gallery = () => {
     setLightboxImageSrc("");
   };
 
-  if (loading) {
+  if ((loading && activeTab === "photos") || (videoLoading && activeTab === "videos")) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
@@ -236,7 +358,6 @@ const Gallery = () => {
                   ? "bg-green-600 text-white shadow-lg"
                   : "bg-transparent text-gray-600 hover:bg-gray-100"
               }`}
-              disabled
             >
               🎥 ভিডিও
             </button>
@@ -244,7 +365,7 @@ const Gallery = () => {
         </div>
 
         {/* Content */}
-        {activeTab === "photos" && (
+        {activeTab === "photos" ? (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Topics Sidebar */}
             {topics.length > 0 && (
@@ -349,24 +470,93 @@ const Gallery = () => {
               </div>
             </div>
           </div>
-        )}
+        ) : (
+          <div className="flex gap-8">
+            {/* Video Topics Sidebar */}
+            <div className="w-64 shrink-0">
+              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">ভিডিও বিষয়</h3>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => handleVideoTopicSelect(null)}
+                    className={`w-full text-left px-4 py-2 rounded-lg transition-all ${
+                      selectedVideoTopic === null
+                        ? "bg-green-600 text-white shadow-md"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    সব ভিডিও
+                  </button>
+                  {videoTopics.map((topic) => (
+                    <button
+                      key={topic._id}
+                      onClick={() => handleVideoTopicSelect(topic._id)}
+                      className={`w-full text-left px-4 py-2 rounded-lg transition-all ${
+                        selectedVideoTopic === topic._id
+                          ? "bg-green-600 text-white shadow-md"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      {topic.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-        {activeTab === "videos" && (
-          <div className="text-center py-16 bg-white rounded-lg shadow-md border border-gray-200">
-            <svg
-              className="w-24 h-24 mx-auto text-gray-300 mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-              />
-            </svg>
-            <p className="text-gray-500 text-lg font-medium">ভিডিও বিভাগ শীঘ্রই আসছে...</p>
+            {/* Video Grid */}
+            <div className="flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                {videos.length === 0 ? (
+                  <div className="col-span-full text-center py-16 bg-white rounded-lg shadow-md border border-gray-200">
+                    <svg
+                      className="w-24 h-24 mx-auto text-gray-300 mb-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <p className="text-gray-500 text-lg font-medium">এখনো কোন ভিডিও আপলোড করা হয়নি</p>
+                  </div>
+                ) : (
+                  videos.map((video) => {
+                    const videoId = getYouTubeVideoId(video.videoUrl);
+                    return (
+                      <div
+                        key={video._id}
+                        className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow"
+                      >
+                        <div className="aspect-video">
+                          {videoId ? (
+                            <iframe
+                              src={`https://www.youtube.com/embed/${videoId}`}
+                              title={video.title}
+                              className="w-full h-full"
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            ></iframe>
+                          ) : (
+                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                              <p className="text-gray-500">ভিডিও লোড করা যাচ্ছে না</p>
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-4">
+                          <h4 className="font-semibold text-gray-800">{video.title}</h4>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>

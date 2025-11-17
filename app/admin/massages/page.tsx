@@ -16,6 +16,7 @@ interface Message {
 
 const Messages = () => {
   const { data: session } = useSession();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
@@ -58,8 +59,20 @@ const Messages = () => {
     try {
       setLoading(true);
       const token = getAuthToken();
+      if (!token) {
+        console.warn('No auth token available in session.');
+        Swal.fire({
+          icon: 'warning',
+          title: 'অননুমোদিত',
+          text: 'অ্যাডমিন অধিকার নেই, অনুগ্রহ করে লগইন করুন।',
+        });
+        setLoading(false);
+        return;
+      }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/messages`, {
+      const url = `${API_URL}/api/messages`;
+      console.debug('Fetching messages from', url, 'with token:', getAuthToken());
+      const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -90,7 +103,7 @@ const Messages = () => {
     if (!message.isRead) {
       try {
         const token = getAuthToken();
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/messages/${message._id}/read`, {
+        await fetch(`${API_URL}/api/messages/${message._id}/read`, {
           method: "PATCH",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -128,7 +141,7 @@ const Messages = () => {
       try {
         const token = getAuthToken();
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/messages/${messageId}`,
+          `${API_URL}/api/messages/${messageId}`,
           {
             method: "DELETE",
             headers: {
@@ -181,9 +194,9 @@ const Messages = () => {
           </p>
         </div>
 
-        <div className="w-full sm:w-auto">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <label htmlFor="search" className="sr-only">Search</label>
-          <div className="relative">
+          <div className="relative flex-1">
             <svg
               aria-hidden="true"
               className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
@@ -200,6 +213,161 @@ const Messages = () => {
               placeholder="অনুসন্ধান করুন"
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none"
             />
+          </div>
+          <div className="flex items-center gap-2 ml-3">
+            <button
+              onClick={async () => {
+                const result = await Swal.fire({
+                  title: 'সব বার্তা মুছবেন?',
+                  text: 'আপনি কি নিশ্চিত যে আপনি সব বার্তা মুছতে চান? এই কাজ অপরিবর্তনীয়।',
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonColor: '#dc2626',
+                  cancelButtonColor: '#6b7280',
+                  confirmButtonText: 'হ্যাঁ, সব মুছুন',
+                  cancelButtonText: 'না',
+                });
+
+                if (result.isConfirmed) {
+                  try {
+                    const token = getAuthToken();
+                    const response = await fetch(`${API_URL}/api/messages`, {
+                      method: 'DELETE',
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    });
+
+                    if (!response.ok) {
+                      throw new Error('Failed to delete all messages');
+                    }
+
+                    await Swal.fire({
+                      icon: 'success',
+                      title: 'সব বার্তা মুছে ফেলা হয়েছে!',
+                      showConfirmButton: false,
+                      timer: 1500,
+                    });
+
+                    fetchMessages();
+                    setSelectedMessage(null);
+                  } catch (error) {
+                    console.error('Error deleting all messages:', error);
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'ত্রুটি!',
+                      text: 'সব বার্তা মুছতে ব্যর্থ হয়েছে',
+                    });
+                  }
+                }
+              }}
+              className={`px-4 py-2 rounded-lg text-sm ${messages.length === 0 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-red-600 text-white hover:bg-red-700'}`}
+              disabled={messages.length === 0}
+            >
+              সব মুছুন
+            </button>
+            <button
+              onClick={async () => {
+                const result = await Swal.fire({
+                  title: 'সব পঠিত বার্তা মুছবেন?',
+                  text: 'আপনি কি নিশ্চিত যে আপনি সমস্ত পঠিত বার্তা মুছতে চান? এই কাজ অপরিবর্তনীয়।',
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonColor: '#dc2626',
+                  cancelButtonColor: '#6b7280',
+                  confirmButtonText: 'হ্যাঁ, সব পঠিত মুছুন',
+                  cancelButtonText: 'না',
+                });
+
+                if (result.isConfirmed) {
+                  try {
+                    const token = getAuthToken();
+                    const response = await fetch(`${API_URL}/api/messages/read`, {
+                      method: 'DELETE',
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    });
+
+                    if (!response.ok) {
+                      throw new Error('Failed to delete read messages');
+                    }
+
+                    await Swal.fire({
+                      icon: 'success',
+                      title: 'সব পঠিত বার্তা মুছে ফেলা হয়েছে!',
+                      showConfirmButton: false,
+                      timer: 1500,
+                    });
+
+                    fetchMessages();
+                    setSelectedMessage(null);
+                  } catch (error) {
+                    console.error('Error deleting read messages:', error);
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'ত্রুটি!',
+                      text: 'পঠিত বার্তা মুছতে ব্যর্থ হয়েছে',
+                    });
+                  }
+                }
+              }}
+              className={`px-4 py-2 rounded-lg text-sm ${messages.filter((m) => m.isRead).length === 0 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-yellow-500 text-white hover:bg-yellow-600'}`}
+              disabled={messages.filter((m) => m.isRead).length === 0}
+            >
+              সব পঠিত
+            </button>
+            <button
+              onClick={async () => {
+                const result = await Swal.fire({
+                  title: 'সব অপঠিত বার্তা মুছবেন?',
+                  text: 'আপনি কি নিশ্চিত যে আপনি সমস্ত অপঠিত বার্তা মুছতে চান? এই কাজ অপরিবর্তনীয়।',
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonColor: '#dc2626',
+                  cancelButtonColor: '#6b7280',
+                  confirmButtonText: 'হ্যাঁ, সব অপঠিত মুছুন',
+                  cancelButtonText: 'না',
+                });
+
+                if (result.isConfirmed) {
+                  try {
+                    const token = getAuthToken();
+                    const response = await fetch(`${API_URL}/api/messages/unread`, {
+                      method: 'DELETE',
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    });
+
+                    if (!response.ok) {
+                      throw new Error('Failed to delete unread messages');
+                    }
+
+                    await Swal.fire({
+                      icon: 'success',
+                      title: 'সব অপঠিত বার্তা মুছে ফেলা হয়েছে!',
+                      showConfirmButton: false,
+                      timer: 1500,
+                    });
+
+                    fetchMessages();
+                    setSelectedMessage(null);
+                  } catch (error) {
+                    console.error('Error deleting unread messages:', error);
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'ত্রুটি!',
+                      text: 'অপঠিত বার্তা মুছতে ব্যর্থ হয়েছে',
+                    });
+                  }
+                }
+              }}
+              className={`px-4 py-2 rounded-lg text-sm ${messages.filter((m) => !m.isRead).length === 0 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+              disabled={messages.filter((m) => !m.isRead).length === 0}
+            >
+              সব অপঠিত
+            </button>
           </div>
         </div>
       </div>
