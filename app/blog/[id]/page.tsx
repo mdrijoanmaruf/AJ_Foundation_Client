@@ -149,7 +149,7 @@ const BlogDetails = () => {
         className="mb-0"
       />
 
-      <section className="py-16 px-4 md:px-8 lg:px-16 bg-gradient-to-b from-gray-50 to-white min-h-screen">
+      <section className="py-16 px-4 md:px-8 lg:px-16 bg-linear-to-b from-gray-50 to-white min-h-screen">
         <div className="max-w-6xl mx-auto">
           {/* Breadcrumb */}
           <nav className="mb-8 text-sm">
@@ -240,7 +240,7 @@ const BlogDetails = () => {
                           className="object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                        <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-gray-100 to-gray-200">
                           <svg
                             className="w-16 h-16 text-gray-400"
                             fill="none"
@@ -276,7 +276,7 @@ const BlogDetails = () => {
         <div className="text-center">
           <Link
             href="/blog"
-            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold text-lg"
+            className="inline-flex items-center gap-3 px-8 py-4 bg-linear-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold text-lg"
           >
             <svg
               className="w-6 h-6"
