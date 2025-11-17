@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { FaEnvelope, FaPhone } from "react-icons/fa";
+import TitleBg from "../../components/Contact/TitleBg";
 
 interface TeamMember {
   _id: string;
@@ -41,17 +42,16 @@ const About = () => {
   return (
     <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <div className="bg-linear-to-r from-green-600 to-blue-600 text-white py-20">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">
-            আমাদের সম্পর্কে
-          </h1>
-          <p className="text-lg md:text-xl text-center max-w-3xl mx-auto opacity-90">
+      <TitleBg
+        title="আমাদের সম্পর্কে"
+        subtitle={
+          <p className="text-lg md:text-xl max-w-3xl mx-auto opacity-90">
             এজে খান ফাউন্ডেশন একটি অলাভজনক সংস্থা যা শিক্ষা, সেবা এবং দাওয়াহর
             মাধ্যমে সমাজের উন্নয়নে কাজ করছে
           </p>
-        </div>
-      </div>
+        }
+        image={"https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=2070&auto=format&fit=crop"}
+      />
 
       {/* Mission & Vision Section */}
       <div className="container mx-auto px-4 py-16">
