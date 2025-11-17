@@ -79,7 +79,7 @@ const ProgramDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
       <TitleBg title={program.title} />
 
       <div className="max-w-7xl mx-auto px-4 py-12">
@@ -181,7 +181,7 @@ const ProgramDetails = () => {
             <div className="space-y-6">
               {/* Objectives */}
               {program.objectives && program.objectives.length > 0 && (
-                <div className="bg-gradient-to-br from-green-50 to-white rounded-xl shadow-lg p-6 border-l-4 border-green-600">
+                <div className="bg-linear-to-br from-green-50 to-white rounded-xl shadow-lg p-6 border-l-4 border-green-600">
                   <h5 className="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
                     <span className="w-2 h-8 bg-green-600 rounded"></span>
                     প্রকল্পের লক্ষ্য-উদ্দেশ্য
@@ -189,7 +189,7 @@ const ProgramDetails = () => {
                   <div className="space-y-3">
                     {program.objectives.map((objective, index) => (
                       <div key={index} className="flex items-start gap-3">
-                        <FaCheckCircle className="text-green-600 mt-1 flex-shrink-0" />
+                        <FaCheckCircle className="text-green-600 mt-1 shrink-0" />
                         <p className="text-gray-700 text-sm">{objective}</p>
                       </div>
                     ))}
@@ -199,7 +199,7 @@ const ProgramDetails = () => {
 
               {/* Beneficiaries */}
               {program.beneficiaries && program.beneficiaries.length > 0 && (
-                <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl shadow-lg p-6 border-l-4 border-blue-600">
+                <div className="bg-linear-to-br from-blue-50 to-white rounded-xl shadow-lg p-6 border-l-4 border-blue-600">
                   <h5 className="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
                     <span className="w-2 h-8 bg-blue-600 rounded"></span>
                     উপকারভোগী
@@ -207,7 +207,7 @@ const ProgramDetails = () => {
                   <div className="space-y-3">
                     {program.beneficiaries.map((beneficiary, index) => (
                       <div key={index} className="flex items-start gap-3">
-                        <FaUsers className="text-blue-600 mt-1 flex-shrink-0" />
+                        <FaUsers className="text-blue-600 mt-1 shrink-0" />
                         <p className="text-gray-700 text-sm">{beneficiary}</p>
                       </div>
                     ))}
@@ -217,7 +217,7 @@ const ProgramDetails = () => {
 
               {/* Expense Categories */}
               {program.expenseCategories && program.expenseCategories.length > 0 && (
-                <div className="bg-gradient-to-br from-orange-50 to-white rounded-xl shadow-lg p-6 border-l-4 border-orange-600">
+                <div className="bg-linear-to-br from-orange-50 to-white rounded-xl shadow-lg p-6 border-l-4 border-orange-600">
                   <h5 className="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
                     <span className="w-2 h-8 bg-orange-600 rounded"></span>
                     ব্যয়ের খাত
@@ -225,7 +225,7 @@ const ProgramDetails = () => {
                   <div className="space-y-3">
                     {program.expenseCategories.map((category, index) => (
                       <div key={index} className="flex items-start gap-3">
-                        <FaCheckCircle className="text-orange-600 mt-1 flex-shrink-0" />
+                        <FaCheckCircle className="text-orange-600 mt-1 shrink-0" />
                         <p className="text-gray-700 text-sm">{category}</p>
                       </div>
                     ))}
@@ -235,7 +235,7 @@ const ProgramDetails = () => {
 
               {/* Areas */}
               {program.areas && program.areas.length > 0 && (
-                <div className="bg-gradient-to-br from-purple-50 to-white rounded-xl shadow-lg p-6 border-l-4 border-purple-600">
+                <div className="bg-linear-to-br from-purple-50 to-white rounded-xl shadow-lg p-6 border-l-4 border-purple-600">
                   <h5 className="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
                     <span className="w-2 h-8 bg-purple-600 rounded"></span>
                     প্রকল্পের এলাকা
@@ -243,7 +243,7 @@ const ProgramDetails = () => {
                   <div className="space-y-3">
                     {program.areas.map((area, index) => (
                       <div key={index} className="flex items-start gap-3">
-                        <FaMapMarkerAlt className="text-purple-600 mt-1 flex-shrink-0" />
+                        <FaMapMarkerAlt className="text-purple-600 mt-1 shrink-0" />
                         <p className="text-gray-700 text-sm">{area}</p>
                       </div>
                     ))}
@@ -253,13 +253,13 @@ const ProgramDetails = () => {
 
               {/* Duration */}
               {program.duration && (
-                <div className="bg-gradient-to-br from-indigo-50 to-white rounded-xl shadow-lg p-6 border-l-4 border-indigo-600">
+                <div className="bg-linear-to-br from-indigo-50 to-white rounded-xl shadow-lg p-6 border-l-4 border-indigo-600">
                   <h5 className="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
                     <span className="w-2 h-8 bg-indigo-600 rounded"></span>
                     মেয়াদ
                   </h5>
                   <div className="flex items-start gap-3">
-                    <FaCalendar className="text-indigo-600 mt-1 flex-shrink-0" />
+                    <FaCalendar className="text-indigo-600 mt-1 shrink-0" />
                     <p className="text-gray-700 text-sm">{program.duration}</p>
                   </div>
                 </div>

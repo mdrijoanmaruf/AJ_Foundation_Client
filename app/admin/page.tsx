@@ -3,6 +3,20 @@
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
+import Link from "next/link";
+import {
+  FaUsers,
+  FaEnvelope,
+  FaImages,
+  FaUserShield,
+  FaArrowUp,
+  FaArrowDown,
+  FaClock,
+  FaChartLine,
+  FaUserPlus,
+  FaCheckCircle,
+  FaProjectDiagram,
+} from "react-icons/fa";
 
 interface DashboardStats {
   totalUsers: number;
@@ -10,6 +24,9 @@ interface DashboardStats {
   newUsersThisMonth: number;
   adminCount: number;
   unreadMessages: number;
+  totalMessages?: number;
+  totalGalleryImages?: number;
+  totalPrograms?: number;
   recentActivity: Array<{
     user: string;
     action: string;
@@ -91,42 +108,61 @@ const Admin = () => {
     {
       label: "মোট ব্যবহারকারী",
       value: stats?.totalUsers || 0,
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
-      ),
-      color: "bg-blue-500",
+      icon: <FaUsers className="w-6 h-6" />,
+      color: "from-blue-500 to-blue-600",
+      bgLight: "bg-blue-50",
+      textColor: "text-blue-600",
+      link: "/admin/all-user",
+      trend: stats?.newUsersThisMonth ? `+${stats.newUsersThisMonth} এই মাসে` : null,
     },
     {
-      label: "অ্যাক্টিভ ব্যবহারকারী",
+      label: "সক্রিয় ব্যবহারকারী",
       value: stats?.activeUsers || 0,
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-      color: "bg-green-500",
+      icon: <FaCheckCircle className="w-6 h-6" />,
+      color: "from-green-500 to-green-600",
+      bgLight: "bg-green-50",
+      textColor: "text-green-600",
+      link: "/admin/all-user",
+      trend: stats?.activeUsers && stats?.totalUsers 
+        ? `${Math.round((stats.activeUsers / stats.totalUsers) * 100)}% মোট থেকে` 
+        : null,
     },
     {
-      label: "নতুন রেজিস্ট্রেশন (এই মাসে)",
-      value: stats?.newUsersThisMonth || 0,
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-        </svg>
-      ),
-      color: "bg-purple-500",
+      label: "মোট বার্তা",
+      value: stats?.totalMessages || 0,
+      icon: <FaEnvelope className="w-6 h-6" />,
+      color: "from-purple-500 to-purple-600",
+      bgLight: "bg-purple-50",
+      textColor: "text-purple-600",
+      link: "/admin/massages",
+      trend: stats?.unreadMessages ? `${stats.unreadMessages} নতুন` : null,
+    },
+    {
+      label: "গ্যালারি ছবি",
+      value: stats?.totalGalleryImages || 0,
+      icon: <FaImages className="w-6 h-6" />,
+      color: "from-pink-500 to-pink-600",
+      bgLight: "bg-pink-50",
+      textColor: "text-pink-600",
+      link: "/admin/gallery",
+    },
+    {
+      label: "প্রোগ্রাম",
+      value: stats?.totalPrograms || 0,
+      icon: <FaProjectDiagram className="w-6 h-6" />,
+      color: "from-indigo-500 to-indigo-600",
+      bgLight: "bg-indigo-50",
+      textColor: "text-indigo-600",
+      link: "/admin/programs",
     },
     {
       label: "অ্যাডমিন",
       value: stats?.adminCount || 0,
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-        </svg>
-      ),
-      color: "bg-orange-500",
+      icon: <FaUserShield className="w-6 h-6" />,
+      color: "from-orange-500 to-orange-600",
+      bgLight: "bg-orange-50",
+      textColor: "text-orange-600",
+      link: "/admin/all-user",
     },
   ];
 
@@ -143,10 +179,11 @@ const Admin = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {statCards.map((stat, index) => (
-          <div
+          <Link
             key={index}
+            href={stat.link || "#"}
             className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between">
@@ -155,12 +192,15 @@ const Admin = () => {
                   {stat.label}
                 </p>
                 <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                {stat.trend && (
+                  <p className="text-xs text-gray-500 mt-1">{stat.trend}</p>
+                )}
               </div>
-              <div className={`${stat.color} p-3 rounded-lg text-white`}>
+              <div className={`${stat.bgLight} p-3 rounded-lg ${stat.textColor}`}>
                 {stat.icon}
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -168,42 +208,49 @@ const Admin = () => {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">দ্রুত কাজ</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="flex items-center gap-3 p-4 border-2 border-green-600 rounded-lg hover:bg-green-50 transition-colors text-left">
+          <Link
+            href="/admin/all-user"
+            className="flex items-center gap-3 p-4 border-2 border-green-600 rounded-lg hover:bg-green-50 transition-colors text-left"
+          >
             <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center text-white">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
+              <FaUserPlus className="w-5 h-5" />
             </div>
             <div>
-              <p className="font-semibold text-gray-900">নতুন ব্যবহারকারী যোগ করুন</p>
+              <p className="font-semibold text-gray-900">ব্যবহারকারী যোগ করুন</p>
               <p className="text-sm text-gray-500">ম্যানুয়ালি যোগ করুন</p>
             </div>
-          </button>
+          </Link>
 
-          <button className="flex items-center gap-3 p-4 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-left">
+          <Link
+            href="/admin/massages"
+            className="flex items-center gap-3 p-4 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-left"
+          >
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
+              <FaEnvelope className="w-5 h-5" />
             </div>
-            <div>
-              <p className="font-semibold text-gray-900">রিপোর্ট দেখুন</p>
-              <p className="text-sm text-gray-500">বিস্তারিত বিশ্লেষণ</p>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-900">বার্তা দেখুন</p>
+              <p className="text-sm text-gray-500">মেসেজ পরিচালনা করুন</p>
             </div>
-          </button>
+            {stats?.unreadMessages ? (
+              <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                {stats.unreadMessages}
+              </div>
+            ) : null}
+          </Link>
 
-          <button className="flex items-center gap-3 p-4 border-2 border-purple-600 rounded-lg hover:bg-purple-50 transition-colors text-left">
+          <Link
+            href="/admin/gallery"
+            className="flex items-center gap-3 p-4 border-2 border-purple-600 rounded-lg hover:bg-purple-50 transition-colors text-left"
+          >
             <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center text-white">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+              <FaImages className="w-5 h-5" />
             </div>
             <div>
-              <p className="font-semibold text-gray-900">সিস্টেম সেটিংস</p>
-              <p className="text-sm text-gray-500">কনফিগার করুন</p>
+              <p className="font-semibold text-gray-900">গ্যালারি</p>
+              <p className="text-sm text-gray-500">ছবি যোগ করুন</p>
             </div>
-          </button>
+          </Link>
         </div>
       </div>
 
