@@ -99,7 +99,7 @@ const Programs = () => {
                   <div className="space-y-2 mb-4">
                     {program.areas && program.areas.length > 0 && (
                       <div className="flex items-start gap-2 text-sm text-gray-600">
-                        <FaMapMarkerAlt className="text-green-600 mt-1 flex-shrink-0" />
+                        <FaMapMarkerAlt className="text-green-600 mt-1 shrink-0" />
                         <span className="line-clamp-1">
                           {program.areas.join(", ")}
                         </span>

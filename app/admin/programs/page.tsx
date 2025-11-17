@@ -55,6 +55,7 @@ const ProgramsAdmin = () => {
 
   const [imagePreview, setImagePreview] = useState("");
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchPrograms();
@@ -166,6 +167,7 @@ const ProgramsAdmin = () => {
       areas: formData.areas.filter((item) => item.trim() !== ""),
     };
 
+    setIsSubmitting(true);
     try {
       const url = editingProgram
         ? `${process.env.NEXT_PUBLIC_API_URL}/api/programs/${editingProgram._id}`
@@ -200,6 +202,8 @@ const ProgramsAdmin = () => {
     } catch (error) {
       console.error("Error saving program:", error);
       Swal.fire("ত্রুটি!", "কিছু ভুল হয়েছে", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -385,313 +389,410 @@ const ProgramsAdmin = () => {
 
       {/* Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg max-w-4xl w-full my-8">
-            <div className="p-6 max-h-[85vh] overflow-y-auto">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 sticky top-0 bg-white pb-4 border-b">
-                {editingProgram ? "প্রোগ্রাম এডিট করুন" : "নতুন প্রোগ্রাম যোগ করুন"}
-              </h2>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-5xl w-full shadow-2xl max-h-[90vh] flex flex-col">
+            {/* Modal Header - Fixed */}
+            <div className="px-8 py-6 border-b border-gray-200 bg-linear-to-r from-green-50 to-blue-50">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {editingProgram ? "প্রোগ্রাম এডিট করুন" : "নতুন প্রোগ্রাম যোগ করুন"}
+                </h2>
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-white rounded-full"
+                >
+                  <FaTimes className="text-xl" />
+                </button>
+              </div>
+            </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Title */}
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    শিরোনাম *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    বিবরণ *
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    rows={4}
-                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-
-                {/* Main Photo */}
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    প্রধান ছবি *
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="w-full border border-gray-300 rounded-lg p-2"
-                  />
-                  {imagePreview && (
-                    <div className="mt-4 relative h-48 w-full">
-                      <Image
-                        src={imagePreview}
-                        alt="Preview"
-                        fill
-                        className="object-cover rounded-lg"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* YouTube Link */}
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    ইউটিউব ভিডিও লিংক (ঐচ্ছিক)
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.youtubeLink}
-                    onChange={(e) =>
-                      setFormData({ ...formData, youtubeLink: e.target.value })
-                    }
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-
-                {/* Objectives */}
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    প্রকল্পের লক্ষ্য-উদ্দেশ্য
-                  </label>
-                  {formData.objectives.map((objective, index) => (
-                    <div key={index} className="flex gap-2 mb-2">
+            {/* Modal Body - Scrollable */}
+            <div className="flex-1 overflow-y-auto px-8 py-6">
+              <form onSubmit={handleSubmit} className="space-y-8" id="program-form">
+                {/* Basic Information Section */}
+                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <span className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm">1</span>
+                    মৌলিক তথ্য
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    {/* Title */}
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2 text-sm">
+                        শিরোনাম <span className="text-red-500">*</span>
+                      </label>
                       <input
                         type="text"
-                        value={objective}
+                        value={formData.title}
                         onChange={(e) =>
-                          updateArrayField("objectives", index, e.target.value)
+                          setFormData({ ...formData, title: e.target.value })
                         }
-                        placeholder={`উদ্দেশ্য ${index + 1}`}
-                        className="flex-1 border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="প্রোগ্রামের শিরোনাম লিখুন"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                        required
                       />
-                      <button
-                        type="button"
-                        onClick={() => removeArrayField("objectives", index)}
-                        className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                      >
-                        <FaTimes />
-                      </button>
                     </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => addArrayField("objectives")}
-                    className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-                  >
-                    <FaPlus /> উদ্দেশ্য যোগ করুন
-                  </button>
-                </div>
 
-                {/* Beneficiaries */}
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    উপকারভোগী
-                  </label>
-                  {formData.beneficiaries.map((beneficiary, index) => (
-                    <div key={index} className="flex gap-2 mb-2">
-                      <input
-                        type="text"
-                        value={beneficiary}
+                    {/* Description */}
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2 text-sm">
+                        বিবরণ <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        value={formData.description}
                         onChange={(e) =>
-                          updateArrayField("beneficiaries", index, e.target.value)
+                          setFormData({ ...formData, description: e.target.value })
                         }
-                        placeholder={`উপকারভোগী ${index + 1}`}
-                        className="flex-1 border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        rows={5}
+                        placeholder="প্রোগ্রামের বিস্তারিত বিবরণ লিখুন"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all resize-none"
+                        required
                       />
-                      <button
-                        type="button"
-                        onClick={() => removeArrayField("beneficiaries", index)}
-                        className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                      >
-                        <FaTimes />
-                      </button>
                     </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => addArrayField("beneficiaries")}
-                    className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-                  >
-                    <FaPlus /> উপকারভোগী যোগ করুন
-                  </button>
-                </div>
-
-                {/* Expense Categories */}
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    ব্যয়ের খাত
-                  </label>
-                  {formData.expenseCategories.map((category, index) => (
-                    <div key={index} className="flex gap-2 mb-2">
-                      <input
-                        type="text"
-                        value={category}
-                        onChange={(e) =>
-                          updateArrayField("expenseCategories", index, e.target.value)
-                        }
-                        placeholder={`খাত ${index + 1}`}
-                        className="flex-1 border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeArrayField("expenseCategories", index)}
-                        className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                      >
-                        <FaTimes />
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => addArrayField("expenseCategories")}
-                    className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-                  >
-                    <FaPlus /> খাত যোগ করুন
-                  </button>
-                </div>
-
-                {/* Areas */}
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    প্রকল্পের এলাকা
-                  </label>
-                  {formData.areas.map((area, index) => (
-                    <div key={index} className="flex gap-2 mb-2">
-                      <input
-                        type="text"
-                        value={area}
-                        onChange={(e) =>
-                          updateArrayField("areas", index, e.target.value)
-                        }
-                        placeholder={`এলাকা ${index + 1}`}
-                        className="flex-1 border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeArrayField("areas", index)}
-                        className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                      >
-                        <FaTimes />
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => addArrayField("areas")}
-                    className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
-                  >
-                    <FaPlus /> এলাকা যোগ করুন
-                  </button>
-                </div>
-
-                {/* Duration & Amount */}
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-gray-700 font-medium mb-2">
-                      মেয়াদ
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.duration}
-                      onChange={(e) =>
-                        setFormData({ ...formData, duration: e.target.value })
-                      }
-                      placeholder="যেমন: ৬ মাস, ১ বছর"
-                      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 font-medium mb-2">
-                      পরিমাণ
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.amount}
-                      onChange={(e) =>
-                        setFormData({ ...formData, amount: e.target.value })
-                      }
-                      placeholder="যেমন: ৫০,০০০ টাকা"
-                      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
                   </div>
                 </div>
 
-                {/* Gallery Images */}
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    গ্যালারি ছবি (একাধিক)
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleGalleryImagesChange}
-                    className="w-full border border-gray-300 rounded-lg p-2"
-                  />
-                  {galleryPreviews.length > 0 && (
-                    <div className="mt-4 grid grid-cols-3 gap-4">
-                      {galleryPreviews.map((preview, index) => (
-                        <div key={index} className="relative h-32">
-                          <Image
-                            src={preview}
-                            alt={`Gallery ${index + 1}`}
-                            fill
-                            className="object-cover rounded-lg"
-                          />
-                        </div>
-                      ))}
+                {/* Media Section */}
+                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm">2</span>
+                    মিডিয়া ও ছবি
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    {/* Main Photo */}
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2 text-sm">
+                        প্রধান ছবি <span className="text-red-500">*</span>
+                      </label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-green-500 transition-colors">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer"
+                        />
+                        {imagePreview && (
+                          <div className="mt-4 relative h-56 w-full rounded-lg overflow-hidden shadow-md">
+                            <Image
+                              src={imagePreview}
+                              alt="Preview"
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
+
+                    {/* YouTube Link */}
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2 text-sm">
+                        ইউটিউব ভিডিও লিংক (ঐচ্ছিক)
+                      </label>
+                      <input
+                        type="url"
+                        value={formData.youtubeLink}
+                        onChange={(e) =>
+                          setFormData({ ...formData, youtubeLink: e.target.value })
+                        }
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                      />
+                    </div>
+
+                    {/* Gallery Images */}
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2 text-sm">
+                        গ্যালারি ছবি (একাধিক)
+                      </label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleGalleryImagesChange}
+                          className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                        />
+                        {galleryPreviews.length > 0 && (
+                          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {galleryPreviews.map((preview, index) => (
+                              <div key={index} className="relative h-28 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                                <Image
+                                  src={preview}
+                                  alt={`Gallery ${index + 1}`}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Order */}
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    ক্রম
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.order}
-                    onChange={(e) =>
-                      setFormData({ ...formData, order: parseInt(e.target.value) })
-                    }
-                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
+                {/* Project Details Section */}
+                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <span className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm">3</span>
+                    প্রকল্পের বিস্তারিত
+                  </h3>
+                  
+                  <div className="space-y-6">
+                    {/* Objectives */}
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-3 text-sm">
+                        প্রকল্পের লক্ষ্য-উদ্দেশ্য
+                      </label>
+                      <div className="space-y-2">
+                        {formData.objectives.map((objective, index) => (
+                          <div key={index} className="flex gap-2">
+                            <div className="flex items-center justify-center w-8 h-10 bg-purple-100 text-purple-600 rounded-lg font-semibold text-sm shrink-0">
+                              {index + 1}
+                            </div>
+                            <input
+                              type="text"
+                              value={objective}
+                              onChange={(e) =>
+                                updateArrayField("objectives", index, e.target.value)
+                              }
+                              placeholder={`উদ্দেশ্য ${index + 1}`}
+                              className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                            />
+                            {formData.objectives.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeArrayField("objectives", index)}
+                                className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors shrink-0"
+                              >
+                                <FaTimes />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => addArrayField("objectives")}
+                        className="mt-3 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 text-sm font-medium"
+                      >
+                        <FaPlus /> উদ্দেশ্য যোগ করুন
+                      </button>
+                    </div>
+
+                    {/* Beneficiaries */}
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-3 text-sm">
+                        উপকারভোগী
+                      </label>
+                      <div className="space-y-2">
+                        {formData.beneficiaries.map((beneficiary, index) => (
+                          <div key={index} className="flex gap-2">
+                            <div className="flex items-center justify-center w-8 h-10 bg-green-100 text-green-600 rounded-lg font-semibold text-sm shrink-0">
+                              {index + 1}
+                            </div>
+                            <input
+                              type="text"
+                              value={beneficiary}
+                              onChange={(e) =>
+                                updateArrayField("beneficiaries", index, e.target.value)
+                              }
+                              placeholder={`উপকারভোগী ${index + 1}`}
+                              className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                            />
+                            {formData.beneficiaries.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeArrayField("beneficiaries", index)}
+                                className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors shrink-0"
+                              >
+                                <FaTimes />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => addArrayField("beneficiaries")}
+                        className="mt-3 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 text-sm font-medium"
+                      >
+                        <FaPlus /> উপকারভোগী যোগ করুন
+                      </button>
+                    </div>
+
+                    {/* Expense Categories */}
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-3 text-sm">
+                        ব্যয়ের খাত
+                      </label>
+                      <div className="space-y-2">
+                        {formData.expenseCategories.map((category, index) => (
+                          <div key={index} className="flex gap-2">
+                            <div className="flex items-center justify-center w-8 h-10 bg-orange-100 text-orange-600 rounded-lg font-semibold text-sm shrink-0">
+                              {index + 1}
+                            </div>
+                            <input
+                              type="text"
+                              value={category}
+                              onChange={(e) =>
+                                updateArrayField("expenseCategories", index, e.target.value)
+                              }
+                              placeholder={`খাত ${index + 1}`}
+                              className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                            />
+                            {formData.expenseCategories.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeArrayField("expenseCategories", index)}
+                                className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors shrink-0"
+                              >
+                                <FaTimes />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => addArrayField("expenseCategories")}
+                        className="mt-3 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2 text-sm font-medium"
+                      >
+                        <FaPlus /> খাত যোগ করুন
+                      </button>
+                    </div>
+
+                    {/* Areas */}
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-3 text-sm">
+                        প্রকল্পের এলাকা
+                      </label>
+                      <div className="space-y-2">
+                        {formData.areas.map((area, index) => (
+                          <div key={index} className="flex gap-2">
+                            <div className="flex items-center justify-center w-8 h-10 bg-blue-100 text-blue-600 rounded-lg font-semibold text-sm shrink-0">
+                              {index + 1}
+                            </div>
+                            <input
+                              type="text"
+                              value={area}
+                              onChange={(e) =>
+                                updateArrayField("areas", index, e.target.value)
+                              }
+                              placeholder={`এলাকা ${index + 1}`}
+                              className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                            />
+                            {formData.areas.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeArrayField("areas", index)}
+                                className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors shrink-0"
+                              >
+                                <FaTimes />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => addArrayField("areas")}
+                        className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm font-medium"
+                      >
+                        <FaPlus /> এলাকা যোগ করুন
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Buttons */}
-                <div className="flex gap-4 pt-4 sticky bottom-0 bg-white pb-4 border-t">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition-colors"
-                  >
-                    {editingProgram ? "আপডেট করুন" : "যোগ করুন"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCloseModal}
-                    className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-lg font-medium transition-colors"
-                  >
-                    বাতিল
-                  </button>
+                {/* Additional Information Section */}
+                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <span className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm">4</span>
+                    অতিরিক্ত তথ্য
+                  </h3>
+                  
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {/* Duration */}
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2 text-sm">
+                        মেয়াদ
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.duration}
+                        onChange={(e) =>
+                          setFormData({ ...formData, duration: e.target.value })
+                        }
+                        placeholder="যেমন: ৬ মাস, ১ বছর"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                      />
+                    </div>
+                    
+                    {/* Amount */}
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2 text-sm">
+                        পরিমাণ
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.amount}
+                        onChange={(e) =>
+                          setFormData({ ...formData, amount: e.target.value })
+                        }
+                        placeholder="যেমন: ৫০,০০০ টাকা"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                      />
+                    </div>
+
+                    {/* Order */}
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2 text-sm">
+                        ক্রম
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.order}
+                        onChange={(e) =>
+                          setFormData({ ...formData, order: parseInt(e.target.value) || 0 })
+                        }
+                        placeholder="0"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                      />
+                    </div>
+                  </div>
                 </div>
               </form>
+            </div>
+
+            {/* Modal Footer - Fixed */}
+            <div className="px-8 py-4 border-t border-gray-200 bg-gray-50 flex gap-3">
+              <button
+                type="button"
+                onClick={handleCloseModal}
+                className="flex-1 bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 py-3 px-6 rounded-lg font-semibold transition-all hover:shadow-md"
+              >
+                বাতিল করুন
+              </button>
+              <button
+                type="submit"
+                form="program-form"
+                disabled={isSubmitting}
+                className={`flex-1 bg-linear-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center">
+                    <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-white inline-block mr-2"></span>
+                    {editingProgram ? 'আপডেট করা হচ্ছে...' : 'সংরক্ষণ করা হচ্ছে...'}
+                  </span>
+                ) : (
+                  editingProgram ? '✓ আপডেট করুন' : '✓ সংরক্ষণ করুন'
+                )}
+              </button>
             </div>
           </div>
         </div>

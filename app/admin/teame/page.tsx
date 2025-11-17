@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Swal from "sweetalert2";
-import { FaPlus, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaTimes } from "react-icons/fa";
 
 interface TeamMember {
   _id: string;
@@ -35,6 +35,7 @@ const TeamAdmin = () => {
     order: 0,
   });
   const [imagePreview, setImagePreview] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchTeamMembers();
@@ -82,6 +83,7 @@ const TeamAdmin = () => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const url = editingMember
         ? `${process.env.NEXT_PUBLIC_API_URL}/api/team/${editingMember._id}`
@@ -116,6 +118,8 @@ const TeamAdmin = () => {
     } catch (error) {
       console.error("Error saving team member:", error);
       Swal.fire("ত্রুটি!", "কিছু ভুল হয়েছে", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -290,14 +294,25 @@ const TeamAdmin = () => {
 
       {/* Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-3xl w-full shadow-2xl max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200 bg-linear-to-r from-green-50 to-blue-50 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">
                 {editingMember ? "টিম সদস্য এডিট করুন" : "নতুন টিম সদস্য যোগ করুন"}
               </h2>
+              <button
+                type="button"
+                onClick={handleCloseModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full"
+              >
+                <FaTimes className="text-xl" />
+              </button>
+            </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <form onSubmit={handleSubmit} className="space-y-4" id="team-form">
                 {/* Image Upload */}
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">
@@ -412,24 +427,34 @@ const TeamAdmin = () => {
                     className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
-
-                {/* Buttons */}
-                <div className="flex gap-4 pt-4">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition-colors"
-                  >
-                    {editingMember ? "আপডেট করুন" : "যোগ করুন"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCloseModal}
-                    className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-lg font-medium transition-colors"
-                  >
-                    বাতিল
-                  </button>
-                </div>
               </form>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex gap-3">
+              <button
+                type="button"
+                onClick={handleCloseModal}
+                disabled={isSubmitting}
+                className="flex-1 bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 py-3 px-6 rounded-lg font-semibold transition-all hover:shadow-md"
+              >
+                বাতিল
+              </button>
+              <button
+                type="submit"
+                form="team-form"
+                disabled={isSubmitting}
+                className={`flex-1 bg-linear-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center">
+                    <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-white inline-block mr-2"></span>
+                    {editingMember ? 'আপডেট করা হচ্ছে...' : 'সংরক্ষণ করা হচ্ছে...'}
+                  </span>
+                ) : (
+                  editingMember ? 'আপডেট করুন' : 'যোগ করুন'
+                )}
+              </button>
             </div>
           </div>
         </div>
