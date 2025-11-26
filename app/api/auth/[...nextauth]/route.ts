@@ -95,13 +95,46 @@ const handler = NextAuth({
 
       return true;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger }) {
+      // On initial sign in, set user data
       if (user) {
         token.id = user.id;
         token.token = (user as any).token;
         token.role = (user as any).role || 'user';
+        token.lastRoleCheck = Date.now();
         console.log("NextAuth JWT: Setting token with role:", token.role, "for user:", token.email);
       }
+      
+      // Refresh user role from backend periodically (every 5 minutes) or on update trigger
+      // This ensures role changes are reflected without requiring logout/login
+      const shouldRefresh = trigger === 'update' || 
+        !token.lastRoleCheck || 
+        (Date.now() - (token.lastRoleCheck as number)) > 5 * 60 * 1000;
+      
+      if (shouldRefresh && token.id && token.token) {
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`, {
+            headers: {
+              'Authorization': `Bearer ${token.token}`,
+            },
+          });
+          
+          if (res.ok) {
+            const data = await res.json();
+            if (data.user && data.user.role) {
+              const oldRole = token.role;
+              token.role = data.user.role;
+              token.lastRoleCheck = Date.now();
+              if (oldRole !== token.role) {
+                console.log("NextAuth JWT: Role changed from", oldRole, "to", token.role, "for user:", token.email);
+              }
+            }
+          }
+        } catch (error) {
+          console.log("NextAuth JWT: Could not refresh role, using cached value");
+        }
+      }
+      
       return token;
     },
     async session({ session, token }) {
