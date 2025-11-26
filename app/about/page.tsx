@@ -13,6 +13,7 @@ interface TeamMember {
   email?: string;
   phone?: string;
   bio?: string;
+  role?: 'team' | 'advisor';
 }
 
 const About = () => {
@@ -54,9 +55,8 @@ const About = () => {
       />
 
       {/* Mission & Vision Section */}
-      <div className="container mx-auto px-4 py-16">
+      {/* <div className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {/* Mission */}
           <div className="bg-white rounded-xl shadow-lg p-8 border-t-4 border-green-600">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               আমাদের লক্ষ্য
@@ -68,8 +68,6 @@ const About = () => {
               কার্যক্রম পরিচালিত হয় মানবসেবা এবং সামাজিক দায়বদ্ধতার মূলমন্ত্রে।
             </p>
           </div>
-
-          {/* Vision */}
           <div className="bg-white rounded-xl shadow-lg p-8 border-t-4 border-blue-600">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               আমাদের দৃষ্টিভঙ্গি
@@ -82,7 +80,7 @@ const About = () => {
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Values Section */}
       <div className="bg-gray-50 py-16">
@@ -126,25 +124,105 @@ const About = () => {
         </div>
       </div>
 
-      {/* Our Team Section */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            আমাদের টিম
-          </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            আমাদের দক্ষ এবং নিবেদিত টিম সদস্যরা নিরলসভাবে কাজ করে যাচ্ছেন
-            ফাউন্ডেশনের লক্ষ্য অর্জনের জন্য
-          </p>
-        </div>
+      {/* Advisors Section */}
+      {teamMembers.filter(m => m.role === 'advisor').length > 0 && (
+        <div className="bg-linear-to-b from-purple-50 to-white py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <div className="inline-block bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                উপদেষ্টা পরিষদ
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                আমাদের উপদেষ্টা
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                ফাউন্ডেশনের দিকনির্দেশনায় আমাদের অভিজ্ঞ উপদেষ্টা পরিষদ
+              </p>
+            </div>
 
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-green-600"></div>
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-600"></div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 max-w-7xl mx-auto">
+                {teamMembers.filter(m => m.role === 'advisor').map((member) => (
+                <div
+                  key={member._id}
+                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 group border-t-4 border-purple-500"
+                >
+                  <div className="relative h-64 overflow-hidden">
+                    <Image
+                      src={member.photo}
+                      alt={member.name}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      {member.name}
+                    </h3>
+                    <p className="text-purple-600 font-medium mb-4">
+                      {member.designation}
+                    </p>
+                    {member.bio && (
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                        {member.bio}
+                      </p>
+                    )}
+                    <div className="flex flex-col gap-2">
+                      {member.email && (
+                        <a
+                          href={`mailto:${member.email}`}
+                          className="flex items-center gap-2 text-gray-600 hover:text-purple-600 text-sm transition-colors"
+                        >
+                          <FaEnvelope className="text-purple-600" />
+                          {member.email}
+                        </a>
+                      )}
+                      {member.phone && (
+                        <a
+                          href={`tel:${member.phone}`}
+                          className="flex items-center gap-2 text-gray-600 hover:text-purple-600 text-sm transition-colors"
+                        >
+                          <FaPhone className="text-purple-600" />
+                          {member.phone}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                ))}
+              </div>
+            )}
           </div>
-        ) : teamMembers.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 max-w-7xl mx-auto">
-            {teamMembers.map((member) => (
+        </div>
+      )}
+
+      {/* Our Team Section */}
+      <div className="bg-linear-to-b from-green-50 to-white py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+              কর্মী দল
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              আমাদের টিম
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              আমাদের দক্ষ এবং নিবেদিত টিম সদস্যরা নিরলসভাবে কাজ করে যাচ্ছেন
+              ফাউন্ডেশনের লক্ষ্য অর্জনের জন্য
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-green-600"></div>
+            </div>
+          ) : teamMembers.filter(m => m.role !== 'advisor').length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 max-w-7xl mx-auto">
+              {teamMembers.filter(m => m.role !== 'advisor').map((member) => (
               <div
                 key={member._id}
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 group"
@@ -191,13 +269,14 @@ const About = () => {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-20">
-            <p className="text-gray-500 text-lg">কোন টিম সদস্য পাওয়া যায়নি</p>
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20">
+              <p className="text-gray-500 text-lg">কোন টিম সদস্য পাওয়া যায়নি</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

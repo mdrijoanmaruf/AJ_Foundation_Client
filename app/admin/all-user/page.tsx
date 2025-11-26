@@ -16,7 +16,7 @@ interface User {
 }
 
 const AllUsers = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
@@ -24,23 +24,44 @@ const AllUsers = () => {
   const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "user">("all");
 
   useEffect(() => {
-    if (session) {
+    if (status === "authenticated" && session) {
+      console.log("Session available:", { 
+        hasToken: !!(session as any).token,
+        user: session.user?.email 
+      });
       fetchUsers();
+    } else if (status === "loading") {
+      console.log("Session loading...");
+    } else if (status === "unauthenticated") {
+      console.log("User not authenticated");
+      setLoading(false);
     }
-  }, [session]);
+  }, [session, status]);
 
-  const getAuthToken = async () => {
+  const getAuthToken = () => {
     // Get the token from NextAuth session
     if (session && (session as any).token) {
       return (session as any).token;
     }
+    console.warn("No token found in session:", session);
     return null;
   };
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = await getAuthToken();
+      const token = getAuthToken();
+      
+      if (!token) {
+        console.error("No auth token available");
+        Swal.fire({
+          icon: "error",
+          title: "অনুমতি নেই!",
+          text: "দয়া করে আবার লগইন করুন",
+        });
+        setLoading(false);
+        return;
+      }
       
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`, {
         headers: {
@@ -49,7 +70,16 @@ const AllUsers = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch users");
+        if (response.status === 401) {
+          Swal.fire({
+            icon: "error",
+            title: "অনুমতি নেই!",
+            text: "দয়া করে আবার লগইন করুন",
+          });
+        } else {
+          throw new Error("Failed to fetch users");
+        }
+        return;
       }
 
       const data = await response.json();
@@ -103,7 +133,17 @@ const AllUsers = () => {
     if (result.isConfirmed) {
       try {
         setUpdatingUserId(userId);
-        const token = await getAuthToken();
+        const token = getAuthToken();
+        
+        if (!token) {
+          Swal.fire({
+            icon: "error",
+            title: "অনুমতি নেই!",
+            text: "দয়া করে আবার লগইন করুন",
+          });
+          setUpdatingUserId(null);
+          return;
+        }
         
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/users/${userId}/role`,

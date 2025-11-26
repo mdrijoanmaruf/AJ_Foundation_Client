@@ -16,6 +16,7 @@ const navItems: NavItem[] = [
   { label: "হোম", href: "/" },
   { label: "আমাদের সম্পর্কে", href: "/about" },
   { label: "কার্যক্রমসমূহ", href: "/programs" },
+  { label: "ব্লগ", href: "/blog" },
   { label: "গ্যালারি", href: "/gallery" },
   { label: "যোগাযোগ", href: "/contact" },
 ];
@@ -24,6 +25,17 @@ const Navbar = () => {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const { isAdmin } = useUserRole();
+
+  // Debug: Log session data when it changes
+  useEffect(() => {
+    if (session) {
+      console.log('Navbar Session Data:', {
+        user: session.user,
+        role: (session.user as any)?.role,
+        isAdmin
+      });
+    }
+  }, [session, isAdmin]);
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -113,7 +125,7 @@ const Navbar = () => {
           href="/"
           className="shrink-0 text-lg sm:text-xl font-bold tracking-tight text-gray-900"
         >
-          <span className="text-green-700">A/J Khan</span> Foundation
+          <span className="text-green-700">A J Khan</span> Foundation
         </Link>
 
         {/* Middle: Nav items */}
@@ -206,6 +218,9 @@ const Navbar = () => {
 
               {showProfileMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <p className="text-xs text-gray-500">রোল: {(session.user as any)?.role || 'user'}</p>
+                  </div>
                   <Link
                     href="/profile"
                     onClick={() => setShowProfileMenu(false)}
@@ -227,7 +242,7 @@ const Navbar = () => {
                       setShowProfileMenu(false);
                       handleLogout();
                     }}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 border-t border-gray-100"
                   >
                     লগআউট
                   </button>
@@ -336,6 +351,9 @@ const Navbar = () => {
                         </p>
                         <p className="text-xs text-gray-500">
                           {session.user?.email}
+                        </p>
+                        <p className="text-xs text-green-600 font-medium mt-0.5">
+                          রোল: {(session.user as any)?.role || 'user'}
                         </p>
                       </div>
                     </div>

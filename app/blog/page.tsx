@@ -114,7 +114,7 @@ const Blog = () => {
         className="mb-0"
       />
 
-      <section className="py-16 px-4 md:px-8 lg:px-16 bg-gradient-to-b from-gray-50 to-white min-h-screen">
+      <section className="py-16 px-4 md:px-8 lg:px-16 bg-linear-to-b from-gray-50 to-white min-h-screen">
         <div className="max-w-7xl mx-auto">
           {/* Search Bar */}
           <div className="mb-12">
@@ -191,7 +191,7 @@ const Blog = () => {
                         </div>
                       </div>
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                      <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-gray-100 to-gray-200">
                         <svg
                           className="w-20 h-20 text-gray-400"
                           fill="none"
@@ -309,7 +309,7 @@ const Blog = () => {
                     <li key={pageNumber}>
                       <button
                         onClick={() => paginate(pageNumber)}
-                        className={`min-w-[48px] px-4 py-3 rounded-xl border-2 font-semibold transition-all ${
+                        className={`min-w-12 px-4 py-3 rounded-xl border-2 font-semibold transition-all ${
                           currentPage === pageNumber
                             ? "bg-green-600 text-white border-green-600 shadow-lg scale-110"
                             : "border-gray-300 hover:border-green-600 hover:bg-green-50"

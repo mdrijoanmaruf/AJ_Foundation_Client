@@ -14,6 +14,7 @@ interface TeamMember {
   email?: string;
   phone?: string;
   bio?: string;
+  role: 'team' | 'advisor';
   order: number;
   isActive: boolean;
 }
@@ -32,6 +33,7 @@ const TeamAdmin = () => {
     email: "",
     phone: "",
     bio: "",
+    role: "team" as 'team' | 'advisor',
     order: 0,
   });
   const [imagePreview, setImagePreview] = useState("");
@@ -132,6 +134,7 @@ const TeamAdmin = () => {
       email: member.email || "",
       phone: member.phone || "",
       bio: member.bio || "",
+      role: member.role || "team",
       order: member.order,
     });
     setImagePreview(member.photo);
@@ -187,6 +190,7 @@ const TeamAdmin = () => {
       email: "",
       phone: "",
       bio: "",
+      role: "team",
       order: 0,
     });
     setImagePreview("");
@@ -253,9 +257,14 @@ const TeamAdmin = () => {
                 <h3 className="text-lg font-bold text-gray-900 mb-1">
                   {member.name}
                 </h3>
-                <p className="text-green-600 text-sm mb-2">
+                <p className="text-green-600 text-sm mb-1">
                   {member.designation}
                 </p>
+                {member.role === 'advisor' && (
+                  <span className="inline-block bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full mb-2">
+                    উপদেষ্টা
+                  </span>
+                )}
                 {member.email && (
                   <p className="text-gray-600 text-xs mb-1">📧 {member.email}</p>
                 )}
@@ -411,6 +420,26 @@ const TeamAdmin = () => {
                     rows={4}
                     className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
+                </div>
+
+                {/* Role Checkbox */}
+                <div>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.role === 'advisor'}
+                      onChange={(e) =>
+                        setFormData({ ...formData, role: e.target.checked ? 'advisor' : 'team' })
+                      }
+                      className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-2 focus:ring-purple-500"
+                    />
+                    <span className="text-gray-700 font-medium">
+                      উপদেষ্টা হিসেবে চিহ্নিত করুন
+                    </span>
+                  </label>
+                  <p className="text-sm text-gray-500 mt-1 ml-8">
+                    এই সদস্যকে উপদেষ্টা হিসেবে দেখানো হবে
+                  </p>
                 </div>
 
                 {/* Order */}

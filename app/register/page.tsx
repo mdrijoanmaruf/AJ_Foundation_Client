@@ -59,34 +59,28 @@ export default function Register() {
       const data = await res.json();
 
       if (!res.ok) {
+        console.error("Registration failed:", data);
         setError(data.message || "রেজিস্ট্রেশন করতে সমস্যা হয়েছে");
         setLoading(false);
         return;
       }
 
-      // Auto login after registration
-      const result = await signIn("credentials", {
-        email: formData.email,
-        password: formData.password,
-        redirect: false,
+      console.log("Registration successful:", { 
+        userId: data.user?.id, 
+        email: data.user?.email 
       });
 
-      if (result?.error) {
-        setError("রেজিস্ট্রেশন সফল হয়েছে, কিন্তু লগইন করতে সমস্যা হয়েছে");
-        setLoading(false);
-        return;
-      }
-
+      // Show success message and redirect to login
       await Swal.fire({
         icon: "success",
         title: "রেজিস্ট্রেশন সফল হয়েছে!",
-        text: "আপনি সফলভাবে অ্যাকাউন্ট তৈরি করেছেন",
-        showConfirmButton: false,
-        timer: 1500,
+        text: "এখন আপনার নতুন অ্যাকাউন্ট দিয়ে লগইন করুন",
+        confirmButtonText: "লগইন করুন",
+        confirmButtonColor: "#16a34a",
       });
 
-      router.push("/");
-      router.refresh();
+      // Redirect to login page
+      router.push("/login");
     } catch (error) {
       console.error("Registration error:", error);
       setError("রেজিস্ট্রেশন করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");

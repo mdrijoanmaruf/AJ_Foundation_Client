@@ -29,17 +29,30 @@ export default function Login() {
     setLoading(true);
 
     try {
+      console.log("Login form submitted for:", formData.email);
       const result = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
         redirect: false,
       });
 
+      console.log("SignIn result:", result);
+
       if (result?.error) {
+        console.error("Login failed with error:", result.error);
         setError("ইমেইল বা পাসওয়ার্ড ভুল হয়েছে");
         setLoading(false);
         return;
       }
+
+      if (!result?.ok) {
+        console.error("Login failed - result not ok");
+        setError("ইমেইল বা পাসওয়ার্ড ভুল হয়েছে");
+        setLoading(false);
+        return;
+      }
+
+      console.log("Login successful!");
 
       await Swal.fire({
         icon: "success",

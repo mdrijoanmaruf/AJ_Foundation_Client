@@ -1,4 +1,5 @@
 import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 export const useUserRole = () => {
   const { data: session, status } = useSession();
@@ -7,6 +8,17 @@ export const useUserRole = () => {
   const isAdmin = role === "admin";
   const isUser = role === "user";
   const isLoading = status === "loading";
+
+  useEffect(() => {
+    if (session) {
+      console.log("useUserRole Hook:", {
+        email: session.user?.email,
+        role: role,
+        isAdmin: isAdmin,
+        rawSession: session
+      });
+    }
+  }, [session, role, isAdmin]);
 
   return {
     role,
