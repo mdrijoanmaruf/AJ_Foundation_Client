@@ -47,7 +47,7 @@ const Service = () => {
       <div className="max-w-7xl mx-auto">
         {/* Section Title */}
         <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-          উম্মাহের স্বার্থে, সুন্নাহের সাথে
+          মানবতার হাত বাড়াই, আশার আলো জ্বালাই
         </h2>
 
         {/* Services Grid */}

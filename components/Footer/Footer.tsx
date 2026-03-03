@@ -12,10 +12,10 @@ const Footer = () => {
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/10 rounded flex items-center justify-center"> 
                 {/* simple mark */}
-                <span className="text-green-200 font-bold">AS</span>
+                <span className="text-green-200 font-bold">AJ</span>
               </div>
               <div>
-                <div className="text-lg font-bold">AS-SUNNAH</div>
+                <div className="text-lg font-bold">AJ Khan</div>
                 <div className="text-sm text-emerald-200">Foundation</div>
               </div>
             </div>
