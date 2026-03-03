@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 
 const WhatsApp = () => {
   const pathname = usePathname();
-  const phoneNumber = "+8801813606468";
+  const phoneNumber = "+9660543242651";
   const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || "https://aj-foundation.vercel.app";
   const currentUrl = `${baseUrl}${pathname}`;
   
